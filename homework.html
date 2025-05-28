@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم مدیریت کلاس - بررسی تکالیف</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        .form-select, .form-input, .form-textarea {
+            padding-right: 0.75rem; /* برای همخوانی با ظاهر فارسی */
+        }
+        /* استایل برای جداول خواناتر */
+        table th, table td {
+            padding: 0.75rem; /* 12px */
+            text-align: right;
+        }
+        table th {
+            background-color: #f3f4f6; /* bg-gray-100 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <header class="bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold">سیستم مدیریت کلاس</h1>
+            <nav>
+                <ul class="flex space-x-4 space-x-reverse">
+                    <li><a href="index.html" class="hover:text-sky-200">داشبورد</a></li>
+                    <li><a href="students.html" class="hover:text-sky-200">دانش‌آموزان</a></li>
+                    <li><a href="grades.html" class="hover:text-sky-200">نمرات</a></li>
+                    <li><a href="homework.html" class="text-sky-200 font-semibold border-b-2 border-sky-200">تکالیف</a></li>
+                    <li><a href="attendance.html" class="hover:text-sky-200">غیبت‌ها</a></li>
+                    <li><a href="reports.html" class="hover:text-sky-200">گزارش‌ها</a></li>
+                    <li><a href="#" class="hover:text-sky-200">خروج</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h2 class="text-2xl font-semibold text-indigo-600 mb-4 md:mb-0">مدیریت و بررسی تکالیف</h2>
+                <button id="defineHomeworkBtn" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out">
+                    تعریف تکلیف جدید
+                </button>
+            </div>
+
+            <div class="mb-8 bg-gray-50 p-4 rounded-lg shadow-sm">
+                <h3 class="text-lg font-medium text-gray-700 mb-3">فیلتر تکالیف</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                        <label for="filter-date" class="block text-sm font-medium text-gray-700">تاریخ تحویل:</label>
+                        <input type="text" id="filter-date" name="filter-date" class="form-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="مثلا: ۱۴۰۳/۰۴/۱۰">
+                    </div>
+                    <div>
+                        <label for="filter-subject" class="block text-sm font-medium text-gray-700">درس:</label>
+                        <select id="filter-subject" name="filter-subject" class="form-select mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="">همه دروس</option>
+                            <option value="math">ریاضی</option>
+                            <option value="farsi">فارسی</option>
+                            <option value="science">علوم</option>
+                            </select>
+                    </div>
+                    <div>
+                        <label for="filter-student" class="block text-sm font-medium text-gray-700">دانش‌آموز:</label>
+                        <select id="filter-student" name="filter-student" class="form-select mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="">همه دانش‌آموزان</option>
+                            <option value="1">علی رضایی</option>
+                            <option value="2">زهرا احمدی</option>
+                            </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out">
+                            اعمال فیلتر
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-semibold text-indigo-500 mb-4">لیست تکالیف</h3>
+                <div class="overflow-x-auto bg-white rounded-lg shadow">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عنوان تکلیف</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">درس</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاریخ تعریف</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاریخ تحویل</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت کلی</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="homework-list-table-body" class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">حل تمرینات فصل ۳ کتاب ریاضی</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">ریاضی</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">۱۴۰۳/۰۳/۰۱</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">۱۴۰۳/۰۳/۰۷</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-orange-500">درحال بررسی</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a href="#" class="text-blue-600 hover:text-blue-900 ml-3">مشاهده جزئیات/ثبت وضعیت</a>
+                                    <a href="#" class="text-indigo-600 hover:text-indigo-900 ml-3">ویرایش</a>
+                                    <a href="#" class="text-red-600 hover:text-red-900">حذف</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">نوشتن انشا با موضوع "تابستان"</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">فارسی</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">۱۴۰۳/۰۲/۲۵</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">۱۴۰۳/۰۳/۰۵</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">بررسی شده</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a href="#" class="text-blue-600 hover:text-blue-900 ml-3">مشاهده جزئیات/ثبت وضعیت</a>
+                                    <a href="#" class="text-indigo-600 hover:text-indigo-900 ml-3">ویرایش</a>
+                                    <a href="#" class="text-red-600 hover:text-red-900">حذف</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                    موردی برای نمایش وجود ندارد (یا در حال بارگذاری...)
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="homeworkModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center hidden z-50">
+            <div class="relative mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+                <div class="flex justify-between items-center pb-3 border-b">
+                    <p id="modalTitle" class="text-2xl font-bold text-indigo-600">تعریف تکلیف جدید</p>
+                    <button id="closeHomeworkModal" class="text-black cursor-pointer z-50">
+                        <svg class="fill-current" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    </button>
+                </div>
+                <form id="homeworkForm" class="mt-4">
+                    <div class="mb-4">
+                        <label for="homeworkTitle" class="block text-sm font-medium text-gray-700 mb-1">عنوان تکلیف:</label>
+                        <input type="text" id="homeworkTitle" name="homeworkTitle" required class="form-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="homeworkSubject" class="block text-sm font-medium text-gray-700 mb-1">درس:</label>
+                            <select id="homeworkSubject" name="homeworkSubject" required class="form-select mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="">-- انتخاب درس --</option>
+                                <option value="math">ریاضی</option>
+                                <option value="farsi">فارسی</option>
+                                <option value="science">علوم</option>
+                                <option value="hedye">هدیه‌های آسمانی</option>
+                                <option value="social">مطالعات اجتماعی</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="homeworkDueDate" class="block text-sm font-medium text-gray-700 mb-1">تاریخ تحویل:</label>
+                            <input type="text" id="homeworkDueDate" name="homeworkDueDate" required class="form-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="مثلا: ۱۴۰۳/۰۴/۱۵">
+                            <p class="text-xs text-gray-500 mt-1">تقویم شمسی بعداً اضافه می‌شود.</p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="homeworkDescription" class="block text-sm font-medium text-gray-700 mb-1">توضیحات (اختیاری):</label>
+                        <textarea id="homeworkDescription" name="homeworkDescription" rows="3" class="form-textarea mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                    </div>
+                    <div class="flex justify-end pt-2 border-t">
+                        <button type="button" id="cancelHomeworkModal" class="px-4 bg-gray-200 p-3 rounded-lg text-gray-700 hover:bg-gray-300 mr-2">انصراف</button>
+                        <button type="submit" class="px-4 bg-indigo-500 p-3 rounded-lg text-white hover:bg-indigo-600">ذخیره تکلیف</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-700 text-white text-center p-4 mt-12">
+        <p>&copy; ۱۴۰۳-۱۴۰۴ سیستم مدیریت کلاس. تمامی حقوق محفوظ است.</p>
+    </footer>
+
+    <script>
+        // انتخابگرهای مودال تعریف تکلیف
+        const defineHomeworkBtn = document.getElementById('defineHomeworkBtn');
+        const homeworkModal = document.getElementById('homeworkModal');
+        const closeHomeworkModalBtn = document.getElementById('closeHomeworkModal');
+        const cancelHomeworkModalBtn = document.getElementById('cancelHomeworkModal');
+        const homeworkForm = document.getElementById('homeworkForm');
+        const modalTitle = document.getElementById('modalTitle');
+        const homeworkListTableBody = document.getElementById('homework-list-table-body');
+
+        // باز کردن مودال
+        defineHomeworkBtn.addEventListener('click', () => {
+            modalTitle.textContent = 'تعریف تکلیف جدید';
+            homeworkForm.reset(); // پاک کردن فرم برای تعریف جدید
+            homeworkModal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden'); // جلوگیری از اسکرول صفحه اصلی
+        });
+
+        // بستن مودال
+        function closeModal() {
+            homeworkModal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+        closeHomeworkModalBtn.addEventListener('click', closeModal);
+        cancelHomeworkModalBtn.addEventListener('click', closeModal);
+
+        // بستن مودال با کلیک بیرون از آن (اختیاری)
+        homeworkModal.addEventListener('click', (event) => {
+            if (event.target === homeworkModal) { // اگر روی پس زمینه تیره کلیک شد
+                closeModal();
+            }
+        });
+         // بستن مودال با دکمه Esc
+        document.addEventListener('keydown', function (event) {
+            if (event.key === "Escape" && !homeworkModal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+
+        // مدیریت ارسال فرم تکلیف
+        homeworkForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const title = document.getElementById('homeworkTitle').value.trim();
+            const subject = document.getElementById('homeworkSubject').value;
+            const subjectText = document.getElementById('homeworkSubject').options[document.getElementById('homeworkSubject').selectedIndex].text;
+            const dueDate = document.getElementById('homeworkDueDate').value.trim();
+            const description = document.getElementById('homeworkDescription').value.trim(); // توضیحات اختیاری
+
+            if (!title || !subject || !dueDate) {
+                alert('لطفاً عنوان، درس و تاریخ تحویل را مشخص کنید.');
+                return;
+            }
+
+            // در اینجا باید داده‌ها به بک‌اند ارسال شوند یا در لیست نمایش داده شوند
+            // فعلا فقط یک ردیف نمونه به جدول اضافه می‌کنیم
+            const newRow = homeworkListTableBody.insertRow(0); // اضافه کردن ردیف در ابتدای جدول
+            newRow.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${title}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${subjectText}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date().toLocaleDateString('fa-IR')}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dueDate}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">جدید</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <a href="#" class="text-blue-600 hover:text-blue-900 ml-3">مشاهده جزئیات/ثبت وضعیت</a>
+                    <a href="#" class="text-indigo-600 hover:text-indigo-900 ml-3">ویرایش</a>
+                    <a href="#" class="text-red-600 hover:text-red-900">حذف</a>
+                </td>
+            `;
+
+            // بررسی و حذف ردیف "موردی برای نمایش وجود ندارد" اگر وجود دارد
+            const noItemsRow = homeworkListTableBody.querySelector('td[colspan="6"]');
+            if (noItemsRow) {
+                noItemsRow.parentElement.remove();
+            }
+
+            alert('تکلیف با موفقیت تعریف شد! (نمایش ظاهری)');
+            closeModal();
+        });
+
+        // TODO: افزودن قابلیت ویرایش و حذف تکالیف
+        // TODO: پیاده‌سازی صفحه جزئیات تکلیف و ثبت وضعیت توسط دانش‌آموزان
+        // TODO: اتصال به بک‌اند برای ذخیره و بازیابی داده‌ها
+    </script>
+</body>
+</html>

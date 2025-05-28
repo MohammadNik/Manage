@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم مدیریت کلاس - داشبورد</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        /* استایل‌های سفارشی کوچک در صورت نیاز */
+        .calendar-placeholder {
+            min-height: 300px; /* حداقل ارتفاع برای نمایش تقویم */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <header class="bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold">سیستم مدیریت کلاس</h1>
+            <nav>
+                <ul class="flex space-x-4 space-x-reverse">
+                    <li><a href="index.html" class="text-sky-200 font-semibold border-b-2 border-sky-200">داشبورد</a></li>
+                    <li><a href="students.html" class="hover:text-sky-200">دانش‌آموزان</a></li>
+                    <li><a href="grades.html" class="hover:text-sky-200">نمرات</a></li>
+                    <li><a href="homework.html" class="hover:text-sky-200">تکالیف</a></li>
+                    <li><a href="attendance.html" class="hover:text-sky-200">غیبت‌ها</a></li>
+                    <li><a href="reports.html" class="hover:text-sky-200">گزارش‌ها</a></li>
+                    <li><a href="#" class="hover:text-sky-200">خروج</a></li> </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-indigo-600">تقویم و رویدادهای مهم</h2>
+                <div class="calendar-placeholder border border-gray-300 rounded-md p-4 flex items-center justify-center">
+                    <p class="text-gray-500">محل قرارگیری تقویم شمسی و رویدادها</p>
+                    </div>
+                <div class="mt-6">
+                    <h3 class="text-lg font-medium mb-2 text-indigo-500">رویدادهای آتی:</h3>
+                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                        <li>۲۵ اردیبهشت - جلسه اولیا و مربیان (قابل ویرایش)</li>
+                        <li>۱۰ خرداد - آزمون میان‌ترم ریاضی (قابل ویرایش)</li>
+                        </ul>
+                    <button class="mt-4 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out">
+                        افزودن/ویرایش رویداد
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-xl font-semibold mb-4 text-sky-600">دسترسی سریع</h2>
+                    <ul class="space-y-2">
+                        <li><a href="grades.html#daily-entry" class="block py-2 px-3 bg-sky-100 hover:bg-sky-200 rounded-md text-sky-700 transition duration-150">ثبت نمره روزانه</a></li>
+                        <li><a href="homework.html#review" class="block py-2 px-3 bg-sky-100 hover:bg-sky-200 rounded-md text-sky-700 transition duration-150">بررسی تکالیف</a></li>
+                        <li><a href="attendance.html#record" class="block py-2 px-3 bg-sky-100 hover:bg-sky-200 rounded-md text-sky-700 transition duration-150">ثبت غیبت</a></li>
+                        <li><a href="students.html#add-student" class="block py-2 px-3 bg-sky-100 hover:bg-sky-200 rounded-md text-sky-700 transition duration-150">افزودن دانش‌آموز جدید</a></li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-xl font-semibold mb-4 text-teal-600">خلاصه وضعیت دانش‌آموزان</h2>
+                    <div class="space-y-3 text-gray-700">
+                        <p>تعداد غایبین امروز: <span class="font-bold text-red-500">۲ نفر</span> (قابل به‌روزرسانی)</p>
+                        <p>تکالیف بررسی نشده: <span class="font-bold text-orange-500">۵ تکلیف</span> (قابل به‌روزرسانی)</p>
+                        <p>تعداد کل دانش آموزان فعال: <span class="font-bold text-green-500">۲۸ نفر</span> (قابل به‌روزرسانی)</p>
+                        </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-gray-700 text-white text-center p-4 mt-12">
+        <p>&copy; ۱۴۰۴-۱۴۰۵ سیستم مدیریت کلاس. تمامی حقوق محفوظ است.</p>
+    </footer>
+
+    </body>
+</html>
