@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم مدیریت کلاس - گزارش‌گیری و ارزیابی</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    <style>
+        html, body { height: 100%; margin: 0; padding: 0; }
+        body { font-family: 'Vazirmatn', sans-serif; display: flex; flex-direction: column; min-height: 100vh; background-color: #f3f4f6; color: #1f2937; }
+        main { flex-grow: 1; }
+        .form-select, .form-input { padding-right: 0.75rem; }
+        .report-section { border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem; background-color: white; }
+        .report-title { font-size: 1.125rem; font-weight: 600; color: #4f46e5; margin-bottom: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; }
+        .report-item { margin-bottom: 0.5rem; }
+        .report-item strong { color: #374151; }
+        .datepicker-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5M12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008ZM14.25 15h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008ZM16.5 15h.008v.008H16.5V15zm0 2.25h.008v.008H16.5v-.008Z' /%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.75rem center; background-size: 1.25rem; padding-left: 2.5rem; cursor: pointer; }
+        .datepicker-plot-area { font-family: 'Vazirmatn', sans-serif !important; }
+        @media print {
+            body * { visibility: hidden; }
+            #printable-report, #printable-report * { visibility: visible; }
+            #printable-report { position: absolute; left: 0; top: 0; width: 100%; margin: 20px; padding:10px; border: none; box-shadow: none;}
+            header, footer, #report-filters-section, #printReportBtnContainer, #page-title-header { display: none !important; }
+            .report-section { border: 1px solid #ccc !important; box-shadow: none !important; margin-bottom: 10mm !important; page-break-inside: avoid; }
+            h2, h3, h4 { page-break-after: avoid; }
+            table, ul, p { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <header id="page-title-header" class="bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold">سیستم مدیریت کلاس</h1>
+            <nav>
+                <ul class="flex space-x-4 space-x-reverse">
+                    <li><a href="index.html" class="hover:text-sky-200">داشبورد</a></li>
+                    <li><a href="students.html" class="hover:text-sky-200">دانش‌آموزان</a></li>
+                    <li><a href="grades.html" class="hover:text-sky-200">نمرات</a></li>
+                    <li><a href="homework.html" class="hover:text-sky-200">تکالیف</a></li>
+                    <li><a href="attendance.html" class="hover:text-sky-200">غیبت‌ها</a></li>
+                    <li><a href="reports.html" class="text-sky-200 font-semibold border-b-2 border-sky-200">گزارش‌ها</a></li>
+                    <li><a href="#" class="hover:text-sky-200">خروج</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold text-indigo-700 mb-6">گزارش‌گیری و ارزیابی دانش‌آموزان</h2>
+
+            <div id="report-filters-section" class="mb-8 p-4 border border-gray-200 rounded-lg bg-gray-50 shadow-sm">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="select-student-report" class="block text-sm font-medium text-gray-700 mb-1">انتخاب دانش‌آموز:</label>
+                        <select id="select-student-report" name="student_report" class="form-select mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="">-- بارگذاری لیست دانش‌آموزان --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="report-start-date" class="block text-sm font-medium text-gray-700 mb-1">از تاریخ (اختیاری):</label>
+                        <input type="text" id="report-start-date" class="form-input datepicker-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="شروع بازه">
+                    </div>
+                    <div>
+                        <label for="report-end-date" class="block text-sm font-medium text-gray-700 mb-1">تا تاریخ (اختیاری):</label>
+                        <input type="text" id="report-end-date" class="form-input datepicker-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="پایان بازه">
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button id="generateReportBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-150 ease-in-out">
+                        تولید گزارش
+                    </button>
+                </div>
+            </div>
+
+            <div id="report-display-area" class="hidden">
+                <div id="printable-report" class="space-y-8">
+                    <div class="text-center mb-6 border-b pb-4">
+                        <h3 class="text-2xl font-bold text-gray-800">گزارش عملکرد دانش‌آموز</h3>
+                        <p id="report-student-name" class="text-xl text-gray-700 mt-2"></p>
+                        <p id="report-student-class" class="text-md text-gray-600"></p>
+                        <p id="report-date-range" class="text-sm text-gray-500 mt-1"></p>
+                    </div>
+
+                    <section id="grades-report-section" class="report-section hidden">
+                        <h4 class="report-title">عملکرد کلی در دروس</h4>
+                        <div id="grades-summary" class="space-y-3">
+                            </div>
+                        <p id="no-grades-message" class="text-gray-500 mt-2 hidden">نمره‌ای برای نمایش در این بازه زمانی یافت نشد.</p>
+                    </section>
+
+                    <section id="homework-report-section" class="report-section hidden">
+                        <h4 class="report-title">وضعیت تکالیف</h4>
+                        <ul id="homework-summary" class="list-disc list-inside space-y-2">
+                            </ul>
+                        <p id="no-homework-message" class="text-gray-500 mt-2 hidden">تکلیفی برای نمایش در این بازه زمانی یافت نشد.</p>
+                    </section>
+
+                    <section id="attendance-report-section" class="report-section hidden">
+                        <h4 class="report-title">وضعیت حضور و غیاب</h4>
+                        <p id="attendance-summary" class="report-item text-lg">
+                            <strong>تعداد کل روزهای غیبت:</strong> 
+                            <span id="total-absences-count" class="font-semibold text-red-700">۰ روز</span>
+                        </p>
+                        <ul id="absence-details" class="list-disc list-inside space-y-1 text-sm">
+                            </ul>
+                         <p id="no-attendance-message" class="text-gray-500 mt-2 hidden">غیبتی برای نمایش در این بازه زمانی یافت نشد.</p>
+                    </section>
+                </div>
+
+                <div id="printReportBtnContainer" class="mt-8 flex justify-end space-x-3 space-x-reverse">
+                    <button id="printReportBtn" class="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-150 ease-in-out">
+                        چاپ گزارش
+                    </button>
+                </div>
+            </div>
+             <div id="no-report-message" class="text-center py-10 text-gray-500">
+                <p>لطفا یک دانش‌آموز را انتخاب کرده و روی دکمه "تولید گزارش" کلیک کنید.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-700 text-white text-center p-4">
+        <p>&copy; ۱۴۰۴ - ۱۴۰۵ سیستم مدیریت کلاس. تمامی حقوق محفوظ است.</p>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:5000/api';
+
+        // انتخابگرهای DOM
+        const selectStudentReport = document.getElementById('select-student-report');
+        const reportStartDateInput = document.getElementById('report-start-date');
+        const reportEndDateInput = document.getElementById('report-end-date');
+        const generateReportBtn = document.getElementById('generateReportBtn');
+        const reportDisplayArea = document.getElementById('report-display-area');
+        const noReportMessage = document.getElementById('no-report-message');
+        const printReportBtn = document.getElementById('printReportBtn');
+
+        // عناصر داخلی بخش گزارش
+        const reportStudentName = document.getElementById('report-student-name');
+        const reportStudentClass = document.getElementById('report-student-class');
+        const reportDateRange = document.getElementById('report-date-range');
+        
+        const gradesReportSection = document.getElementById('grades-report-section');
+        const gradesSummaryDiv = document.getElementById('grades-summary');
+        const noGradesMessage = document.getElementById('no-grades-message');
+
+        const homeworkReportSection = document.getElementById('homework-report-section');
+        const homeworkSummaryUl = document.getElementById('homework-summary');
+        const noHomeworkMessage = document.getElementById('no-homework-message');
+
+        const attendanceReportSection = document.getElementById('attendance-report-section');
+        const totalAbsencesCountSpan = document.getElementById('total-absences-count');
+        const absenceDetailsUl = document.getElementById('absence-details');
+        const noAttendanceMessage = document.getElementById('no-attendance-message');
+
+        $(document).ready(function() {
+            // مقداردهی اولیه تقویم‌ها
+            const datepickerOptions = {
+                format: 'YYYY/MM/DD', autoClose: true, observer: true, persianDigit: true, initialValue: false
+            };
+            if (typeof persianDate !== 'undefined' && typeof $.fn.pDatepicker === 'function') {
+                $('#report-start-date').pDatepicker(datepickerOptions);
+                $('#report-end-date').pDatepicker(datepickerOptions);
+            } else {
+                console.error("pDatepicker یا persianDate در دسترس نیست برای فرم گزارش.");
+            }
+            fetchStudentsForReport();
+        });
+
+        async function fetchStudentsForReport() {
+            selectStudentReport.innerHTML = '<option value="">-- در حال بارگذاری دانش‌آموزان --</option>';
+            try {
+                const response = await fetch(`${API_BASE_URL}/students`);
+                if (!response.ok) throw new Error('خطا در دریافت لیست دانش‌آموزان');
+                const students = await response.json();
+                selectStudentReport.innerHTML = '<option value="">-- انتخاب دانش‌آموز --</option>';
+                students.forEach(student => {
+                    const option = document.createElement('option');
+                    option.value = student.id;
+                    option.textContent = `${student.first_name} ${student.last_name} (${student.student_class || 'کلاس نامشخص'})`;
+                    selectStudentReport.appendChild(option);
+                });
+            } catch (error) {
+                console.error("خطا در fetchStudentsForReport:", error);
+                selectStudentReport.innerHTML = '<option value="">خطا در بارگذاری</option>';
+            }
+        }
+        
+        function getPerformanceColor(performance) {
+            switch (performance) {
+                case 'خیلی خوب': return 'text-green-600';
+                case 'خوب': return 'text-sky-600';
+                case 'قابل قبول': return 'text-yellow-600';
+                case 'نیاز به تلاش مجدد': return 'text-red-600';
+                default: return 'text-gray-700';
+            }
+        }
+
+        generateReportBtn.addEventListener('click', async function() {
+            const studentId = selectStudentReport.value;
+            const startDate = $(reportStartDateInput).val();
+            const endDate = $(reportEndDateInput).val();
+
+            if (!studentId) {
+                alert('لطفاً یک دانش‌آموز را انتخاب کنید.');
+                return;
+            }
+
+            reportDisplayArea.classList.add('hidden');
+            noReportMessage.textContent = 'در حال تولید گزارش...';
+            noReportMessage.classList.remove('hidden');
+
+            let apiUrl = `${API_BASE_URL}/reports/student/${studentId}`;
+            const queryParams = new URLSearchParams();
+            if (startDate) queryParams.append('start_date', startDate);
+            if (endDate) queryParams.append('end_date', endDate);
+            
+            if (queryParams.toString()) {
+                apiUrl += `?${queryParams.toString()}`;
+            }
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({message: `خطای سرور: ${response.status}`}));
+                    throw new Error(errData.message || `خطای سرور: ${response.status}`);
+                }
+                const report = await response.json();
+                console.log("داده گزارش دریافت شد:", report);
+
+                // نمایش اطلاعات دانش آموز
+                reportStudentName.textContent = `${report.student_info.first_name} ${report.student_info.last_name}`;
+                reportStudentClass.textContent = `کلاس: ${report.student_info.student_class || 'نامشخص'}`;
+                reportDateRange.textContent = `بازه زمانی گزارش: از ${report.date_range.start} تا ${report.date_range.end}`;
+
+                // نمایش خلاصه نمرات
+                gradesSummaryDiv.innerHTML = ''; // پاک کردن محتوای قبلی
+                if (report.grades_summary && report.grades_summary.length > 0) {
+                    gradesReportSection.classList.remove('hidden');
+                    noGradesMessage.classList.add('hidden');
+                    report.grades_summary.forEach(subjectData => {
+                        const subjectDiv = document.createElement('div');
+                        subjectDiv.className = 'mb-3 pb-2 border-b border-gray-100';
+                        let subjectHTML = `<h5 class="font-semibold text-gray-700">${subjectData.subject}</h5><ul class="list-disc list-inside pr-4 text-sm">`;
+                        subjectData.entries.forEach(entry => {
+                            subjectHTML += `<li class="${getPerformanceColor(entry.performance)}">${entry.date_str}: ${entry.performance} ${entry.reason ? `(${entry.reason})` : ''}</li>`;
+                        });
+                        subjectHTML += `</ul>`;
+                        subjectDiv.innerHTML = subjectHTML;
+                        gradesSummaryDiv.appendChild(subjectDiv);
+                    });
+                } else {
+                    gradesReportSection.classList.add('hidden'); // اگر نمره‌ای نیست، کل بخش را مخفی کن یا پیام "موردی نیست" را نشان بده
+                    noGradesMessage.classList.remove('hidden');
+                }
+
+                // نمایش خلاصه تکالیف
+                homeworkSummaryUl.innerHTML = '';
+                if (report.homework_summary && report.homework_summary.length > 0) {
+                    homeworkReportSection.classList.remove('hidden');
+                    noHomeworkMessage.classList.add('hidden');
+                    report.homework_summary.forEach(hw => {
+                        const li = document.createElement('li');
+                        li.className = 'report-item';
+                        li.innerHTML = `<strong>${hw.homework_title}</strong> (تحویل: ${hw.due_date}): <span class="font-semibold">${hw.status}</span> ${hw.submission_notes ? `- <i>${hw.submission_notes}</i>` : ''}`;
+                        homeworkSummaryUl.appendChild(li);
+                    });
+                } else {
+                    homeworkReportSection.classList.add('hidden');
+                    noHomeworkMessage.classList.remove('hidden');
+                }
+                
+                // نمایش خلاصه حضور و غیاب
+                if (report.attendance_summary) {
+                    attendanceReportSection.classList.remove('hidden');
+                    totalAbsencesCountSpan.textContent = `${report.attendance_summary.total_absences} روز`;
+                    absenceDetailsUl.innerHTML = '';
+                    if (report.attendance_summary.absences && report.attendance_summary.absences.length > 0) {
+                        noAttendanceMessage.classList.add('hidden');
+                        report.attendance_summary.absences.forEach(absence => {
+                            const li = document.createElement('li');
+                            li.textContent = `${absence.date_str} ${absence.reason ? `- دلیل: ${absence.reason}` : '- دلیل نامشخص'}`;
+                            absenceDetailsUl.appendChild(li);
+                        });
+                    } else {
+                        noAttendanceMessage.classList.remove('hidden');
+                    }
+                } else {
+                     attendanceReportSection.classList.add('hidden');
+                }
+
+
+                reportDisplayArea.classList.remove('hidden');
+                noReportMessage.classList.add('hidden');
+
+            } catch (error) {
+                console.error("خطا در تولید گزارش:", error);
+                noReportMessage.textContent = `خطا در تولید گزارش: ${error.message}`;
+                reportDisplayArea.classList.add('hidden');
+            }
+        });
+
+        printReportBtn.addEventListener('click', function() {
+            console.log("چاپ گزارش...");
+            window.print();
+        });
+
+    </script>
+</body>
+</html>

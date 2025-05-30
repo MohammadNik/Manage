@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم مدیریت کلاس - ثبت نمرات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    <style>
+        html, body { height: 100%; margin: 0; padding: 0; }
+        body { font-family: 'Vazirmatn', sans-serif; display: flex; flex-direction: column; min-height: 100vh; background-color: #f3f4f6; color: #1f2937; }
+        main { flex-grow: 1; }
+        .form-select, .form-input, .form-checkbox, .form-textarea { padding-right: 0.75rem; }
+        table th, table td { padding: 0.75rem; text-align: right; border-bottom-width: 1px; border-color: #e5e7eb; }
+        table th { background-color: #f9fafb; }
+        #date-selector { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5M12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008ZM14.25 15h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008ZM16.5 15h.008v.008H16.5V15zm0 2.25h.008v.008H16.5v-.008Z' /%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.75rem center; background-size: 1.25rem; padding-left: 2.5rem; cursor: pointer; }
+        .datepicker-plot-area { font-family: 'Vazirmatn', sans-serif !important; }
+    </style>
+</head>
+<body>
+    <header class="bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold">سیستم مدیریت کلاس</h1>
+            <nav>
+                <ul class="flex space-x-4 space-x-reverse">
+                    <li><a href="index.html" class="hover:text-sky-200">داشبورد</a></li>
+                    <li><a href="students.html" class="hover:text-sky-200">دانش‌آموزان</a></li>
+                    <li><a href="grades.html" class="text-sky-200 font-semibold border-b-2 border-sky-200">نمرات</a></li>
+                    <li><a href="homework.html" class="hover:text-sky-200">تکالیف</a></li>
+                    <li><a href="attendance.html" class="hover:text-sky-200">غیبت‌ها</a></li>
+                    <li><a href="reports.html" class="hover:text-sky-200">گزارش‌ها</a></li>
+                    <li><a href="#" class="hover:text-sky-200">خروج</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold text-indigo-600 mb-6">ثبت نمرات و عملکرد روزانه</h2>
+            <div class="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <label for="date-selector" class="block text-sm font-medium text-gray-700 mb-1">انتخاب تاریخ:</label>
+                <input type="text" id="date-selector" name="date-selector" class="form-input mt-1 block w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="برای انتخاب تاریخ کلیک کنید...">
+            </div>
+
+            <form id="grade-entry-form">
+                <input type="hidden" id="gradeIdInput">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+                    <div>
+                        <label for="student-select" class="block text-sm font-medium text-gray-700">انتخاب دانش‌آموز:</label>
+                        <select id="student-select" name="student" required class="form-select mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="">-- بارگذاری لیست دانش‌آموزان --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="subject-select" class="block text-sm font-medium text-gray-700">انتخاب درس:</label>
+                        <select id="subject-select" name="subject" required class="form-select mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="">-- انتخاب کنید --</option>
+                            <option value="ریاضی">ریاضی</option>
+                            <option value="فارسی">فارسی</option>
+                            <option value="علوم">علوم</option>
+                            <option value="املا">املا</option>
+                            <option value="هدیه‌های آسمانی">هدیه‌های آسمانی</option>
+                            <option value="مطالعات اجتماعی">مطالعات اجتماعی</option>
+                            <option value="شایستگی">شایستگی</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="performance-scale" class="block text-sm font-medium text-gray-700">وضعیت عملکردی:</label>
+                        <select id="performance-scale" name="performance" required class="form-select mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="">-- انتخاب کنید --</option>
+                            <option value="خیلی خوب">خیلی خوب</option>
+                            <option value="خوب">خوب</option>
+                            <option value="قابل قبول">قابل قبول</option>
+                            <option value="نیاز به تلاش مجدد">نیاز به تلاش مجدد</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="reason-input" class="block text-sm font-medium text-gray-700">دلیل (اختیاری):</label>
+                        <input type="text" id="reason-input" name="reason" class="form-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="مثلا: تقلب، عدم آمادگی و...">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" id="saveGradeBtn" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow transition duration-150 ease-in-out">
+                            ثبت نمره
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="mt-10">
+                <h3 class="text-xl font-semibold text-indigo-500 mb-4">نمرات ثبت شده برای تاریخ: <span id="selected-date-display" class="text-indigo-700">[تاریخی انتخاب نشده]</span></h3>
+                <div class="overflow-x-auto bg-white rounded-lg shadow">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">دانش‌آموز</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">درس</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">دلیل</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="daily-grades-table-body" class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="5" class="px-6 py-4 text-center text-gray-500 no-grades-message">
+                                    لطفاً ابتدا یک تاریخ را برای مشاهده نمرات انتخاب کنید.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-700 text-white text-center p-4">
+        <p>&copy; ۱۴۰۴ - ۱۴۰۵ سیستم مدیریت کلاس. تمامی حقوق محفوظ است.</p>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:5000/api';
+
+        const dateSelectorInput = document.getElementById('date-selector');
+        const studentSelect = document.getElementById('student-select');
+        const subjectSelect = document.getElementById('subject-select');
+        const performanceScaleSelect = document.getElementById('performance-scale');
+        const reasonInput = document.getElementById('reason-input');
+        const gradeEntryForm = document.getElementById('grade-entry-form');
+        const dailyGradesTableBody = document.getElementById('daily-grades-table-body');
+        const selectedDateDisplay = document.getElementById('selected-date-display');
+        const gradeIdInput = document.getElementById('gradeIdInput'); 
+        const saveGradeBtn = document.getElementById('saveGradeBtn');
+
+        $(document).ready(function() {
+            console.log("Document ready. Checking for pDatepicker and persianDate...");
+            if (typeof persianDate !== 'undefined' && typeof $.fn.pDatepicker === 'function') {
+                console.log("pDatepicker and persianDate found. Initializing date picker.");
+                $(dateSelectorInput).pDatepicker({
+                    format: 'YYYY/MM/DD', 
+                    autoClose: true, 
+                    observer: true, 
+                    persianDigit: true, 
+                    initialValue: false,
+                    onSelect: function() {
+                        const formattedDate = $(dateSelectorInput).val();
+                        console.log("Date selected via pDatepicker:", formattedDate);
+                        if (selectedDateDisplay) selectedDateDisplay.textContent = formattedDate || '[تاریخی انتخاب نشده]';
+                        fetchGradesForDate(); 
+                    }
+                });
+            } else { 
+                console.error("کتابخانه persian-date یا pDatepicker به درستی بارگذاری نشده است. آیا jQuery هم بارگذاری شده؟"); 
+                if(dateSelectorInput) dateSelectorInput.placeholder = "تقویم بارگذاری نشد. تاریخ دستی: ۱۴۰۴/۰۱/۱۵";
+            }
+            
+            fetchStudents();
+        });
+
+        async function fetchStudents() {
+            studentSelect.innerHTML = '<option value="">-- در حال بارگذاری دانش‌آموزان... --</option>';
+            console.log(`Fetching students from: ${API_BASE_URL}/students`);
+            try {
+                const response = await fetch(`${API_BASE_URL}/students`);
+                console.log("Response status from /students:", response.status, response.statusText);
+                if (!response.ok) {
+                    let errorText = `خطا در دریافت لیست دانش‌آموزان: ${response.status} ${response.statusText}`;
+                     try {
+                        const errorData = await response.json();
+                        if (errorData && errorData.message) errorText += ` - ${errorData.message}`;
+                    } catch (e) { /* Ignore if error response is not JSON */ }
+                    throw new Error(errorText);
+                }
+                const students = await response.json();
+                console.log("Students fetched:", students);
+
+                studentSelect.innerHTML = '<option value="">-- انتخاب دانش‌آموز --</option>';
+                if (students && students.length > 0) {
+                    students.forEach(student => {
+                        const option = document.createElement('option');
+                        option.value = student.id;
+                        option.textContent = `${student.first_name} ${student.last_name} (${student.student_class || 'بدون کلاس'})`;
+                        studentSelect.appendChild(option);
+                    });
+                } else {
+                    studentSelect.innerHTML = '<option value="">دانش‌آموزی یافت نشد</option>';
+                }
+            } catch (error) {
+                console.error("خطای جامع در fetchStudents:", error);
+                studentSelect.innerHTML = '<option value="">خطا در بارگذاری</option>';
+                let userFriendlyError = `خطا در بارگذاری لیست دانش‌آموزان: ${error.message}. `;
+                userFriendlyError += "\n1. مطمئن شوید سرور بک‌اند (python run.py) در حال اجرا است.";
+                userFriendlyError += "\n2. آدرس API_BASE_URL (${API_BASE_URL}) صحیح است.";
+                userFriendlyError += "\n3. کنسول مرورگر (F12 -> Network tab) را برای جزئیات بیشتر درخواست ناموفق بررسی کنید.";
+                userFriendlyError += "\n4. از فعال بودن CORS در بک‌اند مطمئن شوید.";
+                alert(userFriendlyError);
+            }
+        }
+
+        function clearGradesTable(message = "موردی برای نمایش وجود ندارد.") {
+            dailyGradesTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500 no-grades-message">${message}</td></tr>`;
+        }
+        
+        async function fetchGradesForDate() {
+            const selectedDate = $(dateSelectorInput).val();
+            if (selectedDateDisplay) selectedDateDisplay.textContent = selectedDate || '[تاریخی انتخاب نشده]';
+
+            if (!selectedDate) {
+                clearGradesTable("لطفاً یک تاریخ انتخاب کنید.");
+                return;
+            }
+            clearGradesTable("در حال بارگذاری نمرات روز...");
+            console.log(`Fetching grades for date: ${selectedDate} from ${API_BASE_URL}/grades`);
+            
+            try {
+                const queryParams = new URLSearchParams({ date_str: selectedDate });
+                const response = await fetch(`${API_BASE_URL}/grades?${queryParams.toString()}`);
+                console.log(`Response status from /grades?date_str=${selectedDate}:`, response.status, response.statusText);
+                
+                if (!response.ok) {
+                    let errorData = { message: `خطای HTTP: ${response.status}` };
+                    try { const serverError = await response.json(); errorData.message = serverError.message || errorData.message; } catch (e) {}
+                    throw new Error(errorData.message);
+                }
+                const grades = await response.json();
+                console.log("Grades fetched for the date:", grades);
+                dailyGradesTableBody.innerHTML = ''; 
+
+                if (grades.length === 0) {
+                    clearGradesTable(`نمره‌ای برای تاریخ ${selectedDate} ثبت نشده است.`);
+                    return;
+                }
+
+                grades.forEach(grade => {
+                    const row = dailyGradesTableBody.insertRow();
+                    row.setAttribute('data-grade-id', grade.id); 
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${grade.student_name || 'نامشخص'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${grade.subject}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${getPerformanceColor(grade.performance)}">${grade.performance}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${grade.reason || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button class="edit-grade-btn text-indigo-600 hover:text-indigo-900" data-id="${grade.id}" data-student-id="${grade.student_id}" data-subject="${grade.subject}" data-performance="${grade.performance}" data-date="${grade.date_str}" data-reason="${grade.reason || ''}">ویرایش</button>
+                            <button class="delete-grade-btn text-red-600 hover:text-red-900 ml-2" data-id="${grade.id}">حذف</button>
+                        </td>
+                    `;
+                });
+                addGradeTableEventListeners();
+
+            } catch (error) {
+                console.error('خطا در دریافت نمرات روز:', error);
+                clearGradesTable(`خطا در بارگذاری نمرات: ${error.message}. کنسول را برای جزئیات بیشتر بررسی کنید.`);
+            }
+        }
+        
+        function getPerformanceColor(performance) {
+            switch (performance) {
+                case 'خیلی خوب': return 'text-green-600';
+                case 'خوب': return 'text-sky-600';
+                case 'قابل قبول': return 'text-yellow-600';
+                case 'نیاز به تلاش مجدد': return 'text-red-600';
+                default: return 'text-gray-700';
+            }
+        }
+
+        function addGradeTableEventListeners() {
+            document.querySelectorAll('.edit-grade-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const gradeId = this.getAttribute('data-id');
+                    const studentId = this.getAttribute('data-student-id');
+                    const subject = this.getAttribute('data-subject');
+                    const performance = this.getAttribute('data-performance');
+                    const dateStr = this.getAttribute('data-date');
+                    const reason = this.getAttribute('data-reason');
+                    
+                    gradeIdInput.value = gradeId; 
+                    studentSelect.value = studentId;
+                    subjectSelect.value = subject;
+                    performanceScaleSelect.value = performance;
+                    reasonInput.value = reason;
+
+                    if (dateStr && typeof persianDate !== 'undefined' && typeof $.fn.pDatepicker === 'function' && $(dateSelectorInput).pDatepicker) {
+                        try {
+                            const pDate = new persianDate(dateStr.split('/').map(Number));
+                            if (pDate.isValid()) {
+                                $(dateSelectorInput).pDatepicker('setDate', pDate.valueOf());
+                                if(selectedDateDisplay) selectedDateDisplay.textContent = dateStr;
+                            } else {
+                                $(dateSelectorInput).val(dateStr); 
+                                if(selectedDateDisplay) selectedDateDisplay.textContent = dateStr;
+                            }
+                        } catch(e) {
+                            console.error("خطا در تنظیم تاریخ برای ویرایش در تقویم:", e, dateStr);
+                            $(dateSelectorInput).val(dateStr);
+                             if(selectedDateDisplay) selectedDateDisplay.textContent = dateStr;
+                        }
+                    } else {
+                        $(dateSelectorInput).val(dateStr); 
+                        if(selectedDateDisplay) selectedDateDisplay.textContent = dateStr;
+                    }
+                    
+                    saveGradeBtn.textContent = 'ذخیره تغییرات';
+                    gradeEntryForm.scrollIntoView({ behavior: 'smooth' }); 
+                });
+            });
+
+            document.querySelectorAll('.delete-grade-btn').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const gradeId = this.getAttribute('data-id');
+                    const row = this.closest('tr');
+                    const studentName = row.cells[0].textContent;
+                    const subject = row.cells[1].textContent;
+
+                    if (confirm(`آیا از حذف نمره درس "${subject}" برای دانش‌آموز "${studentName}" مطمئن هستید؟`)) {
+                        console.log(`Attempting to delete grade with ID: ${gradeId}`);
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/grades/${gradeId}`, { method: 'DELETE' });
+                            const responseData = await response.json();
+                            console.log("Delete response status:", response.status, "Data:", responseData);
+                            if (!response.ok) throw new Error(responseData.message || `خطا: ${response.status}`);
+                            
+                            console.log("پیام حذف:", responseData.message); 
+                            fetchGradesForDate(); 
+                        } catch (error) {
+                            console.error('خطا در حذف نمره:', error);
+                            alert(`خطا در حذف نمره: ${error.message}`);
+                        }
+                    }
+                });
+            });
+        }
+
+        gradeEntryForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const gradeId = gradeIdInput.value; 
+            const studentId = studentSelect.value;
+            const dateStr = $(dateSelectorInput).val();
+            const subject = subjectSelect.value;
+            const performance = performanceScaleSelect.value;
+            const reason = reasonInput.value.trim();
+
+            if (!studentId || !dateStr || !subject || !performance) {
+                alert('لطفاً تاریخ، دانش‌آموز، درس و وضعیت عملکردی را پر کنید.');
+                return;
+            }
+
+            const gradeData = {
+                student_id: parseInt(studentId),
+                date_str: dateStr,
+                subject: subject,
+                performance: performance,
+                reason: reason 
+            };
+
+            let url = `${API_BASE_URL}/grades`;
+            let method = 'POST';
+
+            if (gradeId) { 
+                url = `${API_BASE_URL}/grades/${gradeId}`;
+                method = 'PUT';
+            }
+            console.log(`Submitting grade. Method: ${method}, URL: ${url}, Data:`, gradeData);
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(gradeData),
+                });
+
+                const responseData = await response.json();
+                console.log("Save/Update response status:", response.status, "Data:", responseData);
+                if (!response.ok) {
+                    throw new Error(responseData.message || `خطا با کد وضعیت: ${response.status}`);
+                }
+
+                console.log("پیام سرور:", responseData.message || (gradeId ? 'نمره با موفقیت ویرایش شد.' : 'نمره با موفقیت ثبت شد.'));
+                
+                // حفظ تاریخ و دانش‌آموز، پاک کردن بقیه فیلدها
+                // studentSelect.value = ''; // دانش آموز را نگه می‌داریم
+                subjectSelect.value = '';
+                performanceScaleSelect.value = '';
+                reasonInput.value = '';
+                gradeIdInput.value = ''; 
+                saveGradeBtn.textContent = 'ثبت نمره';
+                // dateSelectorInput مقدارش باقی می‌ماند
+
+                fetchGradesForDate(); 
+
+            } catch (error) {
+                console.error(`خطا در ${gradeId ? 'ویرایش' : 'ثبت'} نمره:`, error);
+                alert(`خطا در ${gradeId ? 'ویرایش' : 'ثبت'} نمره: ${error.message}`);
+            }
+        });
+    </script>
+</body>
+</html>
