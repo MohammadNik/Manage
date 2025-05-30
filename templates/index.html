@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم مدیریت کلاس - داشبورد</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    <style>
+        html, body { height: 100%; margin: 0; padding: 0; }
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; 
+        }
+        main {
+            flex-grow: 1; 
+        }
+        #dashboard-calendar-container .datepicker-plot-area {
+            max-width: 100% !important; 
+        }
+        .datepicker-plot-area { font-family: 'Vazirmatn', sans-serif !important; z-index: 5; }
+         .datepicker-plot-area .datepicker-day-view .table-days td.selected, 
+         .datepicker-plot-area .datepicker-day-view .table-days td.selected:hover {
+            background-color: #4f46e5 !important; /* indigo-600 */
+            color: white !important;
+        }
+        .datepicker-plot-area .datepicker-day-view .table-days td.today { 
+            border: 1px solid #2563eb !important; /* blue-600 */
+            background-color: #eff6ff !important; /* blue-50 */
+        }
+        .datepicker-plot-area .datepicker-day-view .table-days td.event-day { 
+            background-color: #fef3c7 !important; /* amber-100 */
+            border-radius: 50%;
+            font-weight: bold;
+        }
+        .progress-bar-container {
+            background-color: #e5e7eb; /* gray-200 */
+            border-radius: 0.375rem; /* rounded-md */
+            overflow: hidden;
+            height: 1.75rem; 
+            width: 100%;
+            direction: ltr; 
+        }
+        .progress-bar {
+            background-color: #3b82f6; /* blue-500 */
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+            color: white;
+            font-size: 0.875rem; /* text-sm */
+            transition: width 0.3s ease-in-out;
+            text-align: center; 
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <header class="bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold"><h1>سیستم مدیریت کلاس</h1></a>
+            <nav>
+                <ul class="flex space-x-4 space-x-reverse">
+                    <li><a href="students.html" class="hover:text-sky-200">دانش‌آموزان</a></li>
+                    <li><a href="grades.html" class="hover:text-sky-200">نمرات</a></li>
+                    <li><a href="homework.html" class="hover:text-sky-200">تکالیف</a></li>
+                    <li><a href="attendance.html" class="hover:text-sky-200">غیبت‌ها</a></li>
+                    <li><a href="performance_log.html" class="hover:text-sky-200">عملکرد</a></li>
+                    <li><a href="reports.html" class="hover:text-sky-200">گزارش‌ها</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-lg space-y-6">
+                <div>
+                    <h2 class="text-xl font-semibold mb-4 text-indigo-600">تقویم</h2>
+                    <div id="dashboard-calendar-container" class="border border-gray-300 rounded-md"></div>
+                    <input type="hidden" id="selected-calendar-date-value"> 
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-medium mb-2 text-indigo-500">افزودن رویداد جدید برای<span id="event-date-display" class="font-semibold mr-1"></span>:</h3>
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <input type="text" id="event-text-input" class="form-input flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" placeholder="شرح رویداد...">
+                        <button id="add-event-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow">افزودن</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-medium mb-2 text-indigo-500">رویدادهای روز <span id="selected-date-for-events-display" class="font-semibold"></span>:</h3>
+                    <ul id="daily-events-list" class="list-disc list-inside space-y-1 text-gray-700 min-h-[50px]">
+                        <li id="no-events-message">رویدادی برای این روز ثبت نشده است.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg shadow-inner"> 
+                    <h2 class="text-xl font-semibold mb-4 text-teal-600">خلاصه وضعیت</h2>
+                    <div class="space-y-3 text-gray-700">
+                        <p>تعداد کل دانش آموزان: <span id="total-students-count" class="font-bold text-green-500">...</span></p>
+                        <p>تعداد غایبین (<span id="absent-date-display" class="font-semibold"></span>): <span id="absent-today-count" class="font-bold text-red-500">...</span></p>
+                        </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-xl font-semibold mb-4 text-sky-600">دسترسی سریع</h2>
+                    <ul class="space-y-2">
+                        <li><a href="grades.html" class="block py-2 px-3 bg-sky-100 hover:bg-sky-200 rounded-md text-sky-700">ثبت نمره</a></li>
+                        <li><a href="homework.html" class="block py-2 px-3 bg-sky-100 hover:bg-sky-200 rounded-md text-sky-700">بررسی تکالیف</a></li>
+                        <li><a href="attendance.html" class="block py-2 px-3 bg-sky-100 hover:bg-sky-200 rounded-md text-sky-700">ثبت غیبت</a></li>
+                        <li><a href="performance_log.html" class="block py-2 px-3 bg-sky-100 hover:bg-sky-200 rounded-md text-sky-700">ثبت عملکرد روزانه</a></li>
+                        <li><a href="students.html" class="block py-2 px-3 bg-sky-100 hover:bg-sky-200 rounded-md text-sky-700">افزودن دانش‌آموز</a></li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-xl font-semibold mb-4 text-purple-600">پیشرفت دروس</h2>
+                    <div id="progress-bars-container" class="space-y-4">
+                        <p id="progress-bar-loading-message" class="text-gray-500">در حال بارگذاری نوارهای پیشرفت...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-700 text-white text-center p-4">
+        <p>&copy; ۱۴۰۴-۱۴۰۵ محمد نیکزاد. تمامی حقوق محفوظ است.</p>
+    </footer>
+
+    <script>
+        console.log("اسکریپت داشبورد شروع شد.");
+        const API_BASE_URL = 'http://127.0.0.1:5000/api';
+
+        const totalStudentsSpan = document.getElementById('total-students-count');
+        const absentTodaySpan = document.getElementById('absent-today-count');
+        const absentDateDisplay = document.getElementById('absent-date-display');
+        // const pendingHomeworkSpan = document.getElementById('pending-homework-count'); // حذف شد
+        // const homeworkDateDisplay = document.getElementById('homework-date-display'); // حذف شد
+        const selectedCalendarDateInput = document.getElementById('selected-calendar-date-value');
+        
+        const eventDateDisplay = document.getElementById('event-date-display');
+        const eventTextInput = document.getElementById('event-text-input');
+        const addEventBtn = document.getElementById('add-event-btn');
+        const dailyEventsList = document.getElementById('daily-events-list');
+        const noEventsMessage = document.getElementById('no-events-message');
+        const selectedDateForEventsDisplay = document.getElementById('selected-date-for-events-display');
+
+        // const dailyHomeworkList = document.getElementById('daily-homework-list'); // حذف شد
+        // const noHomeworkMessageDashboard = document.getElementById('no-homework-message-dashboard'); // حذف شد
+
+        const progressBarsContainer = document.getElementById('progress-bars-container');
+        const progressBarLoadingMessage = document.getElementById('progress-bar-loading-message');
+
+        const subjects = [
+            { name: "ریاضی", totalPages: 140, color: "blue-500", id: "math" },
+            { name: "فارسی", totalPages: 130, color: "green-500", id: "farsi" },
+            { name: "علوم", totalPages: 104, color: "yellow-500", id: "science" },
+            { name: "هدیه‌های آسمانی", totalPages: 128, color: "pink-500", id: "hedye" },
+            { name: "قرآن", totalPages: 80, color: "purple-500", id: "quran" },
+            { name: "مطالعات اجتماعی", totalPages: 130, color: "teal-500", id: "motaleat" }
+        ];
+
+        let currentSelectedDate; 
+
+        $(document).ready(function() {
+            console.log("Document ready. شروع مقداردهی اولیه.");
+            initializeCalendar();
+            renderProgressBars(); 
+            loadAllProgress();
+            console.log("مقداردهی اولیه تمام شد.");
+        });
+
+        function initializeCalendar() {
+            console.log("مقداردهی اولیه تقویم...");
+            if (typeof persianDate !== 'undefined' && typeof $.fn.pDatepicker === 'function') {
+                currentSelectedDate = new persianDate().toLocale('fa').format('YYYY/MM/DD');
+                const todayUnix = new persianDate().startOf('day').valueOf();
+
+                $("#dashboard-calendar-container").pDatepicker({
+                    inline: true, format: 'YYYY/MM/DD', persianDigit: true,
+                    initialValue: false, 
+                    altField: '#selected-calendar-date-value', altFormat: 'YYYY/MM/DD',
+                    onSelect: function(unixDate){
+                        currentSelectedDate = new persianDate(unixDate).toLocale('fa').format('YYYY/MM/DD');
+                        console.log('تاریخ جدید انتخاب شد در onSelect:', currentSelectedDate);
+                        updateDisplaysForSelectedDate(currentSelectedDate);
+                    },
+                    onShow: function() { highlightEventDays(); },
+                    dayRendering: function(dayOptions, tdElement) {
+                        const events = getEvents();
+                        const dateKey = new persianDate([dayOptions.year, dayOptions.month, dayOptions.day]).toLocale('fa').format('YYYY/MM/DD');
+                        if (events[dateKey] && events[dateKey].length > 0) {
+                            $(tdElement).addClass('event-day');
+                        }
+                    }
+                });
+                
+                $('#dashboard-calendar-container').pDatepicker('setDate', todayUnix);
+                console.log("تقویم با تاریخ امروز مقداردهی اولیه شد:", currentSelectedDate);
+                updateDisplaysForSelectedDate(currentSelectedDate);
+
+            } else {
+                console.error("pDatepicker یا persianDate بارگذاری نشده است.");
+                if ($('#dashboard-calendar-container').length) {
+                    $('#dashboard-calendar-container').html('<p class="text-red-500 p-4">خطا در بارگذاری تقویم</p>');
+                }
+            }
+        }
+        
+        function updateDisplaysForSelectedDate(date) {
+            if(eventDateDisplay) eventDateDisplay.textContent = date;
+            if(selectedDateForEventsDisplay) selectedDateForEventsDisplay.textContent = date;
+            if(absentDateDisplay) absentDateDisplay.textContent = date;
+            // if(homeworkDateDisplay) homeworkDateDisplay.textContent = date; // حذف شد
+            
+            fetchDashboardSummary(date);
+            loadEventsForDate(date);
+            // fetchHomeworkForDate(date); // حذف شد
+        }
+
+
+        async function fetchDashboardSummary(selectedDate) {
+            console.log(`در حال دریافت خلاصه وضعیت برای تاریخ: ${selectedDate}`);
+            if (totalStudentsSpan) totalStudentsSpan.textContent = '...';
+            if (absentTodaySpan) absentTodaySpan.textContent = '...';
+            // if (pendingHomeworkSpan) pendingHomeworkSpan.textContent = '...'; // حذف شد
+            
+            try {
+                const studentsResponse = await fetch(`${API_BASE_URL}/students`);
+                if (studentsResponse.ok) {
+                    const students = await studentsResponse.json();
+                    if (totalStudentsSpan) totalStudentsSpan.textContent = `${students.length} نفر`;
+                } else { if (totalStudentsSpan) totalStudentsSpan.textContent = 'خطا'; }
+            } catch (error) {
+                console.error("خطا در دریافت دانش آموزان:", error);
+                if (totalStudentsSpan) totalStudentsSpan.textContent = 'خطا';
+            }
+
+            if (selectedDate) {
+                try {
+                    const attendanceResponse = await fetch(`${API_BASE_URL}/attendance?date_str=${selectedDate}`);
+                    if (attendanceResponse.ok) {
+                        const attendanceRecords = await attendanceResponse.json();
+                        if (absentTodaySpan) absentTodaySpan.textContent = `${attendanceRecords.length} نفر`;
+                    } else { if (absentTodaySpan) absentTodaySpan.textContent = 'خطا'; }
+                } catch (error) {
+                    console.error(`خطا در دریافت غایبین ${selectedDate}:`, error);
+                    if (absentTodaySpan) absentTodaySpan.textContent = 'خطا';
+                }
+                // بخش دریافت تکالیف روز از خلاصه وضعیت حذف شد
+            } else {
+                 if (absentTodaySpan) absentTodaySpan.textContent = 'تاریخ نامشخص';
+                 // if (pendingHomeworkSpan) pendingHomeworkSpan.textContent = 'تاریخ نامشخص'; // حذف شد
+            }
+        }
+
+        function getEvents() { return JSON.parse(localStorage.getItem('calendarEvents') || '{}'); }
+        function saveEvents(events) { 
+            localStorage.setItem('calendarEvents', JSON.stringify(events));
+            if (typeof $ !== 'undefined' && typeof $.fn.pDatepicker === 'function' && $('#dashboard-calendar-container').pDatepicker) {
+                $('#dashboard-calendar-container').pDatepicker('render'); 
+            }
+        }
+        
+        addEventBtn.addEventListener('click', function() {
+            const eventText = eventTextInput.value.trim();
+            const selectedDate = $('#selected-calendar-date-value').val() || currentSelectedDate;
+            if (!eventText) { alert("لطفاً شرح رویداد را وارد کنید."); return; }
+            if (!selectedDate) { alert("لطفاً یک تاریخ از تقویم انتخاب کنید."); return; }
+            const events = getEvents();
+            if (!events[selectedDate]) { events[selectedDate] = []; }
+            events[selectedDate].push(eventText);
+            saveEvents(events);
+            loadEventsForDate(selectedDate);
+            eventTextInput.value = '';
+        });
+
+        function loadEventsForDate(dateStr) {
+            const events = getEvents();
+            dailyEventsList.innerHTML = ''; 
+            if (events[dateStr] && events[dateStr].length > 0) {
+                if(noEventsMessage) noEventsMessage.classList.add('hidden');
+                events[dateStr].forEach((eventText, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'flex justify-between items-center py-1';
+                    li.innerHTML = `<span>${eventText}</span>
+                                    <button class="delete-event-btn text-red-500 hover:text-red-700 text-xs px-2" data-date="${dateStr}" data-index="${index}">&times;</button>`;
+                    dailyEventsList.appendChild(li);
+                });
+                addDeleteEventListeners();
+            } else {
+                if(noEventsMessage) {
+                    noEventsMessage.classList.remove('hidden');
+                    noEventsMessage.textContent = `رویدادی برای ${dateStr} ثبت نشده است.`;
+                }
+            }
+        }
+        function addDeleteEventListeners() {
+            document.querySelectorAll('.delete-event-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const date = this.dataset.date;
+                    const index = parseInt(this.dataset.index);
+                    const events = getEvents();
+                    if (events[date] && events[date][index] !== undefined) {
+                        events[date].splice(index, 1);
+                        if (events[date].length === 0) { delete events[date]; }
+                        saveEvents(events);
+                        loadEventsForDate(date); 
+                    }
+                });
+            });
+        }
+
+        // تابع fetchHomeworkForDate و عناصر مربوط به آن حذف شدند
+
+        function renderProgressBars() {
+            console.log("شروع renderProgressBars. کانتینر:", progressBarsContainer);
+            if (!progressBarsContainer) {
+                console.error("کانتینر نوارهای پیشرفت (progressBarsContainer) یافت نشد!");
+                return;
+            }
+            if (progressBarLoadingMessage) progressBarLoadingMessage.classList.add('hidden'); // مخفی کردن پیام "در حال بارگذاری"
+            
+            progressBarsContainer.innerHTML = ''; // پاک کردن محتوای قبلی (شامل پیام بارگذاری)
+            
+            if (!subjects || subjects.length === 0) {
+                console.warn("آرایه subjects خالی است یا تعریف نشده.");
+                progressBarsContainer.innerHTML = '<p class="text-gray-500">اطلاعات دروس برای نمایش پیشرفت موجود نیست.</p>';
+                return;
+            }
+
+            console.log(`تعداد دروس برای رندر کردن نوار پیشرفت: ${subjects.length}`);
+            subjects.forEach(subject => {
+                console.log(`رندر کردن نوار پیشرفت برای: ${subject.name}`);
+                const progressDiv = document.createElement('div');
+                progressDiv.className = 'mb-3';
+                progressDiv.innerHTML = `
+                    <label class="block text-sm font-medium text-gray-700">${subject.name} (کل: ${subject.totalPages.toLocaleString('fa-IR')} صفحه)</label>
+                    <div class="progress-bar-container mt-1">
+                        <div id="progress-${subject.id}" class="progress-bar bg-${subject.color}" style="width: 0%;">0%</div>
+                    </div>
+                    <div class="mt-2 flex items-center space-x-2 space-x-reverse">
+                        <input type="number" id="input-${subject.id}" class="form-input w-20 px-2 py-1 border border-gray-300 rounded-md text-sm" placeholder="صفحه" min="0" max="${subject.totalPages}">
+                        <button class="update-progress-btn bg-gray-500 hover:bg-gray-600 text-white text-xs py-1 px-2 rounded-md" data-subject-id="${subject.id}">به‌روزرسانی</button>
+                    </div>
+                `;
+                progressBarsContainer.appendChild(progressDiv);
+            });
+            addProgressUpdateListeners();
+            console.log("رندر نوارهای پیشرفت تمام شد.");
+        }
+
+        function loadAllProgress() {
+            console.log("شروع loadAllProgress");
+            subjects.forEach(subject => {
+                const savedPage = localStorage.getItem(`progress-${subject.id}-page`);
+                if (savedPage !== null) {
+                    console.log(`بارگذاری پیشرفت ذخیره شده برای ${subject.name}: صفحه ${savedPage}`);
+                    updateProgressBar(subject.id, parseInt(savedPage), subject.totalPages);
+                    const inputField = document.getElementById(`input-${subject.id}`);
+                    if(inputField) inputField.value = savedPage;
+                }
+            });
+            console.log("بارگذاری تمام پیشرفت‌ها تمام شد.");
+        }
+
+        function addProgressUpdateListeners() {
+            console.log("افزودن شنونده به دکمه‌های به‌روزرسانی پیشرفت");
+            document.querySelectorAll('.update-progress-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const subjectId = this.dataset.subjectId;
+                    const subjectInfo = subjects.find(s => s.id === subjectId);
+                    const inputField = document.getElementById(`input-${subjectId}`);
+                    const currentPage = parseInt(inputField.value);
+
+                    if (!subjectInfo) {
+                        console.error(`اطلاعات درس با شناسه ${subjectId} یافت نشد.`);
+                        return;
+                    }
+
+                    if (isNaN(currentPage) || currentPage < 0 || currentPage > subjectInfo.totalPages) {
+                        alert(`لطفاً یک عدد معتبر بین ۰ و ${subjectInfo.totalPages} برای ${subjectInfo.name} وارد کنید.`);
+                        return;
+                    }
+                    console.log(`به‌روزرسانی پیشرفت برای ${subjectInfo.name} به صفحه ${currentPage}`);
+                    localStorage.setItem(`progress-${subjectId}-page`, currentPage);
+                    updateProgressBar(subjectId, currentPage, subjectInfo.totalPages);
+                });
+            });
+        }
+
+        function updateProgressBar(subjectId, currentPage, totalPages) {
+            const progressBar = document.getElementById(`progress-${subjectId}`);
+            if (progressBar) {
+                const percentage = totalPages > 0 ? Math.round((currentPage / totalPages) * 100) : 0;
+                progressBar.style.width = `${percentage}%`;
+                progressBar.textContent = `${percentage}% (ص ${currentPage.toLocaleString('fa-IR')})`;
+                console.log(`نوار پیشرفت برای ${subjectId} به‌روز شد: ${percentage}%`);
+            } else {
+                console.warn(`المان نوار پیشرفت برای ${subjectId} یافت نشد.`);
+            }
+        }
+    </script>
+</body>
+</html>

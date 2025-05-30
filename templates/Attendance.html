@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم مدیریت کلاس - ثبت غیبت</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    <style>
+        html, body { height: 100%; margin: 0; padding: 0; }
+        body { font-family: 'Vazirmatn', sans-serif; display: flex; flex-direction: column; min-height: 100vh; background-color: #f3f4f6; color: #1f2937; }
+        main { flex-grow: 1; }
+        .form-select, .form-input, .form-checkbox, .form-textarea { padding-right: 0.75rem; }
+        table th, table td { padding: 0.75rem; text-align: right; border-bottom-width: 1px; border-color: #e5e7eb; }
+        table th { background-color: #f9fafb; }
+        #attendance-date-input {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5M12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008ZM14.25 15h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008ZM16.5 15h.008v.008H16.5V15zm0 2.25h.008v.008H16.5v-.008Z' /%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: left 0.75rem center; background-size: 1.25rem; padding-left: 2.5rem; cursor: pointer;
+        }
+        .datepicker-plot-area { font-family: 'Vazirmatn', sans-serif !important; }
+    </style>
+</head>
+<body>
+    <header class="bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold"><h1>سیستم مدیریت کلاس</h1></a>
+            <nav>
+                <ul class="flex space-x-4 space-x-reverse">
+                    <li><a href="students.html" class="hover:text-sky-200">دانش‌آموزان</a></li>
+                    <li><a href="grades.html" class="hover:text-sky-200">نمرات</a></li>
+                    <li><a href="homework.html" class="hover:text-sky-200">تکالیف</a></li>
+                    <li><a href="attendance.html" class="text-sky-200 font-semibold border-b-2 border-sky-200">غیبت‌ها</a></li>
+                    <li><a href="performance_log.html" class="hover:text-sky-200">عملکرد</a></li>
+                    <li><a href="reports.html" class="hover:text-sky-200">گزارش‌ها</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold text-indigo-600 mb-6">ثبت غیبت دانش‌آموزان</h2>
+
+            <div class="mb-8 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <label for="attendance-date-input" class="block text-lg font-medium text-gray-700 mb-2">انتخاب تاریخ برای ثبت غیبت:</label>
+                <input type="text" id="attendance-date-input" class="form-input mt-1 block w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="برای انتخاب تاریخ کلیک کنید...">
+                <p class="text-xs text-gray-500 mt-1">با کلیک روی کادر بالا، تقویم شمسی باز می‌شود.</p>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-semibold text-indigo-500 mb-4">لیست دانش‌آموزان کلاس <span id="selected-class-name-display" class="text-teal-600">(همه کلاس‌ها)</span></h3>
+                <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ردیف</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نام دانش‌آموز</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت حضور</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">دلیل غیبت (اختیاری)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendance-table-body" class="divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 text-center text-gray-500 no-attendance-message">
+                                    ابتدا تاریخ را انتخاب کنید تا لیست دانش‌آموزان بارگذاری شود.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button type="button" id="saveAttendanceBtn" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-150 ease-in-out">
+                        ذخیره غیبت‌ها
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-700 text-white text-center p-4">
+        <p>&copy; ۱۴۰۴-۱۴۰۵ محمد نیکزاد. تمامی حقوق محفوظ است.</p>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:5000/api';
+        let allStudentsList = []; // برای نگهداری لیست کامل دانش آموزان
+
+        const attendanceDateInput = document.getElementById('attendance-date-input');
+        const attendanceTableBody = document.getElementById('attendance-table-body');
+        const saveAttendanceBtn = document.getElementById('saveAttendanceBtn');
+        const noAttendanceMessageRow = () => attendanceTableBody.querySelector('.no-attendance-message')?.parentNode;
+
+
+        $(document).ready(function() {
+            if (typeof persianDate !== 'undefined' && typeof $.fn.pDatepicker === 'function') {
+                $(attendanceDateInput).pDatepicker({
+                    format: 'YYYY/MM/DD',
+                    autoClose: true,
+                    observer: true,
+                    persianDigit: true,
+                    initialValue: false,
+                    onSelect: function() {
+                        const selectedDate = $(attendanceDateInput).val();
+                        console.log("تاریخ انتخاب شده:", selectedDate);
+                        if (selectedDate) {
+                            loadStudentsAndAttendance(selectedDate);
+                        } else {
+                            clearAttendanceTable("لطفاً یک تاریخ معتبر انتخاب کنید.");
+                        }
+                    }
+                });
+                console.log("تقویم شمسی برای غیبت مقداردهی اولیه شد.");
+            } else {
+                console.error("کتابخانه persian-date یا pDatepicker برای غیبت بارگذاری نشده است.");
+                if(attendanceDateInput) attendanceDateInput.placeholder = "تقویم بارگذاری نشد. تاریخ دستی: ۱۴۰۴/MM/DD";
+            }
+            fetchAllStudents(); // خواندن لیست دانش آموزان در ابتدا
+        });
+
+        function clearAttendanceTable(message = "موردی برای نمایش وجود ندارد.") {
+            attendanceTableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500 no-attendance-message">${message}</td></tr>`;
+        }
+
+        async function fetchAllStudents() {
+            console.log("در حال دریافت لیست همه دانش آموزان...");
+            try {
+                const response = await fetch(`${API_BASE_URL}/students`);
+                if (!response.ok) {
+                    throw new Error(`خطا در دریافت لیست دانش‌آموزان: ${response.status} ${response.statusText}`);
+                }
+                allStudentsList = await response.json();
+                console.log("لیست دانش آموزان دریافت شد:", allStudentsList);
+                // پس از دریافت لیست دانش آموزان، اگر تاریخی انتخاب شده بود، لیست را رندر کن
+                const selectedDate = $(attendanceDateInput).val();
+                if (selectedDate) {
+                    loadStudentsAndAttendance(selectedDate);
+                } else {
+                    clearAttendanceTable("لطفاً یک تاریخ انتخاب کنید تا لیست دانش‌آموزان نمایش داده شود.");
+                }
+            } catch (error) {
+                console.error("خطا در fetchAllStudents:", error);
+                clearAttendanceTable(`خطا در بارگذاری لیست دانش‌آموزان: ${error.message}`);
+            }
+        }
+
+        async function loadStudentsAndAttendance(selectedDate) {
+            if (allStudentsList.length === 0) {
+                clearAttendanceTable("لیست دانش‌آموزان هنوز بارگذاری نشده است. لطفاً کمی صبر کنید یا صفحه را رفرش کنید.");
+                return;
+            }
+            
+            clearAttendanceTable("در حال بارگذاری وضعیت حضور و غیاب...");
+            console.log(`در حال دریافت وضعیت غیبت برای تاریخ: ${selectedDate}`);
+
+            try {
+                const attendanceResponse = await fetch(`${API_BASE_URL}/attendance?date_str=${selectedDate}`);
+                if (!attendanceResponse.ok) {
+                    throw new Error(`خطا در دریافت سوابق غیبت: ${attendanceResponse.status}`);
+                }
+                const attendanceRecords = await attendanceResponse.json();
+                console.log("سوابق غیبت دریافت شده:", attendanceRecords);
+
+                // ایجاد یک map از دانش آموزان غایب برای دسترسی سریعتر
+                const absentStudentsMap = new Map();
+                attendanceRecords.forEach(record => {
+                    absentStudentsMap.set(record.student_id, record.reason || '');
+                });
+
+                attendanceTableBody.innerHTML = ''; // پاک کردن پیام "در حال بارگذاری"
+                if (allStudentsList.length === 0) {
+                     clearAttendanceTable("دانش‌آموزی برای نمایش یافت نشد.");
+                     return;
+                }
+
+                allStudentsList.forEach((student, index) => {
+                    const row = attendanceTableBody.insertRow();
+                    const isAbsent = absentStudentsMap.has(student.id);
+                    const reason = isAbsent ? absentStudentsMap.get(student.id) : '';
+
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${index + 1}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${student.first_name} ${student.last_name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <input id="student-${student.id}-absent" name="student-${student.id}-attendance" type="checkbox" 
+                                   class="form-checkbox h-5 w-5 text-red-600 border-gray-300 rounded focus:ring-red-500 cursor-pointer"
+                                   data-student-id="${student.id}" ${isAbsent ? 'checked' : ''}>
+                            <label for="student-${student.id}-absent" class="ml-2 text-sm text-gray-700 cursor-pointer">غایب</label>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <input type="text" name="student-${student.id}-reason" 
+                                   class="form-input block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" 
+                                   placeholder="توضیحات..." value="${reason}" data-student-id="${student.id}">
+                        </td>
+                    `;
+                });
+
+            } catch (error) {
+                console.error('خطا در loadStudentsAndAttendance:', error);
+                clearAttendanceTable(`خطا در بارگذاری وضعیت حضور و غیاب: ${error.message}`);
+            }
+        }
+
+        saveAttendanceBtn.addEventListener('click', async function() {
+            const selectedDate = $(attendanceDateInput).val();
+            if (!selectedDate) {
+                alert("لطفاً ابتدا یک تاریخ انتخاب کنید.");
+                return;
+            }
+
+            const absentStudentsPayload = [];
+            const rows = attendanceTableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const checkbox = row.querySelector('input[type="checkbox"][data-student-id]');
+                const reasonInput = row.querySelector('input[type="text"][data-student-id]');
+                
+                if (checkbox && checkbox.checked) { // فقط دانش آموزان غایب را ارسال کن
+                    const studentId = parseInt(checkbox.getAttribute('data-student-id'));
+                    const reason = reasonInput ? reasonInput.value.trim() : '';
+                    absentStudentsPayload.push({ student_id: studentId, reason: reason });
+                }
+            });
+
+            console.log("داده‌های ارسالی برای ثبت غیبت:", { date_str: selectedDate, absent_students: absentStudentsPayload });
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/attendance`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date_str: selectedDate, absent_students: absentStudentsPayload })
+                });
+                const responseData = await response.json();
+                if (!response.ok) {
+                    throw new Error(responseData.message || `خطا در سرور: ${response.status}`);
+                }
+                console.log("پیام سرور (ثبت غیبت):", responseData.message);
+                // پس از ثبت موفق، نیازی به alert نیست، جدول به طور خودکار با انتخاب تاریخ به‌روز می‌شود
+                // یا می‌توانیم loadStudentsAndAttendance(selectedDate) را دوباره فراخوانی کنیم اگر می‌خواهیم بلافاصله به‌روز شود.
+                // فعلا کاربر باید دوباره تاریخ را انتخاب کند یا صفحه را رفرش کند تا تغییرات را ببیند (یا ما loadStudentsAndAttendance را فراخوانی کنیم)
+                loadStudentsAndAttendance(selectedDate); // بارگذاری مجدد برای نمایش تغییرات
+                 // alert(responseData.message); // حذف alert
+
+            } catch (error) {
+                console.error('خطا در ذخیره اطلاعات غیبت:', error);
+                alert(`خطا در ذخیره اطلاعات غیبت: ${error.message}`);
+            }
+        });
+
+    </script>
+</body>
+</html>

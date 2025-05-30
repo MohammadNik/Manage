@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم مدیریت کلاس - بررسی تکالیف</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <style>
+        html, body { height: 100%; margin: 0; padding: 0; }
+        body { font-family: 'Vazirmatn', sans-serif; display: flex; flex-direction: column; min-height: 100vh; background-color: #f3f4f6; color: #1f2937; }
+        main { flex-grow: 1; }
+        .form-select, .form-input, .form-textarea, .form-checkbox { padding-right: 0.75rem; }
+        table th, table td { padding: 0.75rem; text-align: right; border-bottom-width: 1px; border-color: #e5e7eb; }
+        table th { background-color: #f9fafb; }
+        .modal { transition: opacity 0.25s ease; }
+        .modal-active { overflow-x: hidden; overflow-y: auto; }
+        .modal-open { opacity: 1; pointer-events: auto; }
+        .modal-closed { opacity: 0; pointer-events: none; }
+        .datepicker-input {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5M12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008ZM14.25 15h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008ZM16.5 15h.008v.008H16.5V15zm0 2.25h.008v.008H16.5v-.008Z' /%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: left 0.75rem center; background-size: 1.25rem; padding-left: 2.5rem; cursor: pointer;
+        }
+        .datepicker-plot-area { font-family: 'Vazirmatn', sans-serif !important; z-index: 10000 !important; /* افزایش z-index برای نمایش روی مودال و Select2 */}
+        .select2-container--default .select2-selection--multiple {
+            border: 1px solid #D1D5DB; border-radius: 0.375rem; padding: 0.2rem;
+        }
+        .select2-container { width: 100% !important; }
+        .select2-dropdown { z-index: 10001 !important; /* برای نمایش دراپ داون Select2 روی مودال */}
+    </style>
+</head>
+<body>
+    <header class="bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold"><h1>سیستم مدیریت کلاس</h1></a>
+            <nav>
+                <ul class="flex space-x-4 space-x-reverse">
+                    <li><a href="students.html" class="hover:text-sky-200">دانش‌آموزان</a></li>
+                    <li><a href="grades.html" class="hover:text-sky-200">نمرات</a></li>
+                    <li><a href="homework.html" class="text-sky-200 font-semibold border-b-2 border-sky-200">تکالیف</a></li>
+                    <li><a href="attendance.html" class="hover:text-sky-200">غیبت‌ها</a></li>
+                    <li><a href="performance_log.html" class="hover:text-sky-200">عملکرد</a></li>
+                    <li><a href="reports.html" class="hover:text-sky-200">گزارش‌ها</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h2 class="text-2xl font-semibold text-indigo-600 mb-4 md:mb-0">مدیریت و بررسی تکالیف</h2>
+                <button id="defineHomeworkBtn" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out">
+                    تعریف تکلیف جدید
+                </button>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-semibold text-indigo-500 mb-4">لیست تکالیف</h3>
+                <div class="overflow-x-auto bg-white rounded-lg shadow">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عنوان تکلیف (شامل درس)</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاریخ تعریف</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاریخ تحویل</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="homework-list-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                    <div id="no-homework-message" class="p-6 text-center text-gray-500">در حال بارگذاری لیست تکالیف...</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="homeworkModal" class="modal-closed fixed w-full h-full top-0 left-0 flex items-center justify-center z-40">
+            <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
+            <div class="modal-container bg-white w-full md:max-w-2xl mx-auto rounded-lg shadow-lg z-50 overflow-y-auto">
+                <div class="modal-close-icon absolute top-0 right-0 cursor-pointer mt-4 mr-4 text-gray-700 hover:text-gray-900 z-50">
+                     <svg class="fill-current" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 18 18"><path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/></svg>
+                </div>
+                <div class="modal-content py-4 text-right px-6">
+                    <div class="flex justify-between items-center pb-3 border-b mb-4">
+                        <p id="homeworkModalTitle" class="text-2xl font-bold text-indigo-600">تعریف تکلیف جدید</p>
+                    </div>
+                    <form id="homeworkForm">
+                        <input type="hidden" id="homeworkIdInput">
+                        <div class="mb-4">
+                            <label for="homeworkTitle" class="block text-sm font-medium text-gray-700 mb-1">عنوان تکلیف (شامل نام درس):</label>
+                            <input type="text" id="homeworkTitle" name="homeworkTitle" required class="form-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="مثال: تکلیف ریاضی - فصل ۳">
+                        </div>
+                        <div class="mb-4">
+                            <label for="homeworkDueDate" class="block text-sm font-medium text-gray-700 mb-1">تاریخ تحویل تکلیف:</label>
+                            <input type="text" id="homeworkDueDate" name="homeworkDueDate" required class="form-input datepicker-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" placeholder="برای انتخاب کلیک کنید">
+                        </div>
+                        <div class="mb-4">
+                            <label for="homeworkDescription" class="block text-sm font-medium text-gray-700 mb-1">توضیحات (اختیاری):</label>
+                            <textarea id="homeworkDescription" name="homeworkDescription" rows="3" class="form-textarea mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="targetStudentsSelect" class="block text-sm font-medium text-gray-700 mb-1">دانش‌آموزان هدف (اختیاری، اگر خالی باشد برای همه است):</label>
+                            <select id="targetStudentsSelect" name="target_students" multiple="multiple" class="form-select mt-1 block w-full">
+                                </select>
+                            </div>
+                        <div class="flex justify-end pt-3 mt-4 border-t">
+                            <button type="button" id="cancelHomeworkModalBtn" class="px-4 bg-gray-200 p-3 rounded-lg text-gray-700 hover:bg-gray-300 mr-2">انصراف</button>
+                            <button type="submit" id="saveHomeworkBtn" class="px-4 bg-indigo-500 p-3 rounded-lg text-white hover:bg-indigo-600">ذخیره تکلیف</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="homeworkStatusModal" class="modal-closed fixed w-full h-full top-0 left-0 flex items-center justify-center z-40">
+            <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
+            <div class="modal-container bg-white w-full md:max-w-3xl mx-auto rounded-lg shadow-lg z-50 overflow-y-auto" style="max-height: 90vh;">
+                 <div class="modal-close-icon absolute top-0 right-0 cursor-pointer mt-4 mr-4 text-gray-700 hover:text-gray-900 z-50">
+                     <svg class="fill-current" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 18 18"><path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/></svg>
+                </div>
+                <div class="modal-content py-4 text-right px-6">
+                    <div class="flex justify-between items-center pb-3 border-b mb-4">
+                        <p id="homeworkStatusModalTitle" class="text-2xl font-bold text-teal-600">ثبت وضعیت تکلیف</p>
+                    </div>
+                    <input type="hidden" id="currentHomeworkIdForStatus">
+                    <div class="mb-4">
+                        <p class="text-lg">تکلیف: <span id="homeworkStatusTitleDisplay" class="font-semibold"></span></p>
+                    </div>
+                    <div class="overflow-y-auto max-h-80">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50 sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider">دانش‌آموز</th>
+                                    <th class="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت تکلیف</th>
+                                    <th class="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider">یادداشت (اختیاری)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentHomeworkStatusTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
+                         <div id="no-students-for-status-message" class="p-4 text-center text-gray-500 hidden">لیست دانش آموزان در حال بارگذاری است یا دانش آموزی یافت نشد.</div>
+                    </div>
+                    <div class="flex justify-end pt-3 mt-4 border-t">
+                        <button type="button" id="cancelHomeworkStatusModalBtn" class="px-4 bg-gray-200 p-3 rounded-lg text-gray-700 hover:bg-gray-300 mr-2">انصراف</button>
+                        <button type="button" id="saveAllHomeworkStatusBtn" class="px-4 bg-teal-500 p-3 rounded-lg text-white hover:bg-teal-600">ذخیره وضعیت‌ها</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="deleteHomeworkConfirmModal" class="modal-closed fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+            <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
+            <div class="modal-container bg-white w-11/12 md:max-w-sm mx-auto rounded-lg shadow-lg z-50 overflow-y-auto">
+                <div class="modal-content py-4 text-right px-6">
+                    <div class="flex justify-between items-center pb-3"><p class="text-xl font-bold text-red-600">تایید حذف تکلیف</p></div>
+                    <p class="my-4 text-gray-700">آیا از حذف این تکلیف مطمئن هستید؟</p>
+                    <p id="homeworkTitleToDelete" class="font-semibold text-gray-800 mb-4"></p>
+                    <div class="flex justify-end pt-2">
+                        <input type="hidden" id="homeworkIdToDeleteInput">
+                        <button type="button" id="cancelDeleteHomeworkBtn" class="px-4 bg-gray-200 p-3 rounded-lg text-gray-700 hover:bg-gray-300 mr-2">انصراف</button>
+                        <button type="button" id="confirmDeleteHomeworkBtn" class="px-4 bg-red-600 p-3 rounded-lg text-white hover:bg-red-700">حذف</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="bg-gray-700 text-white text-center p-4 mt-auto"> 
+        <p>&copy; ۱۴۰۴-۱۴۰۵ محمد نیکزاد. تمامی حقوق محفوظ است.</p>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:5000/api';
+        let allStudentsData = []; 
+
+        const defineHomeworkBtn = document.getElementById('defineHomeworkBtn');
+        const homeworkListTableBody = document.getElementById('homework-list-table-body');
+        const noHomeworkMessage = document.getElementById('no-homework-message');
+
+        const homeworkModal = document.getElementById('homeworkModal');
+        const homeworkModalTitle = document.getElementById('homeworkModalTitle');
+        const homeworkForm = document.getElementById('homeworkForm');
+        const homeworkIdInput = document.getElementById('homeworkIdInput');
+        const homeworkTitleInput = document.getElementById('homeworkTitle');
+        // const homeworkSubjectSelect = document.getElementById('homeworkSubject'); // حذف شد
+        // const homeworkDefinedDateInput = document.getElementById('homeworkDefinedDate'); // حذف شد
+        const homeworkDueDateInput = document.getElementById('homeworkDueDate');
+        const homeworkDescriptionTextarea = document.getElementById('homeworkDescription');
+        const targetStudentsSelect = document.getElementById('targetStudentsSelect'); 
+        const saveHomeworkBtn = document.getElementById('saveHomeworkBtn');
+        const cancelHomeworkModalBtn = document.getElementById('cancelHomeworkModalBtn');
+        const homeworkModalOverlay = homeworkModal.querySelector('.modal-overlay');
+        const homeworkModalCloseIcon = homeworkModal.querySelector('.modal-close-icon');
+        
+        const homeworkStatusModal = document.getElementById('homeworkStatusModal');
+        const homeworkStatusTitleDisplay = document.getElementById('homeworkStatusTitleDisplay');
+        const currentHomeworkIdForStatusInput = document.getElementById('currentHomeworkIdForStatus');
+        const studentHomeworkStatusTableBody = document.getElementById('studentHomeworkStatusTableBody');
+        const noStudentsForStatusMessage = document.getElementById('no-students-for-status-message');
+        const saveAllHomeworkStatusBtn = document.getElementById('saveAllHomeworkStatusBtn');
+        const cancelHomeworkStatusModalBtn = document.getElementById('cancelHomeworkStatusModalBtn');
+        const homeworkStatusModalOverlay = homeworkStatusModal.querySelector('.modal-overlay');
+        const homeworkStatusModalCloseIcon = homeworkStatusModal.querySelector('.modal-close-icon');
+
+        const deleteHomeworkConfirmModal = document.getElementById('deleteHomeworkConfirmModal');
+        const cancelDeleteHomeworkBtn = document.getElementById('cancelDeleteHomeworkBtn');
+        const confirmDeleteHomeworkBtn = document.getElementById('confirmDeleteHomeworkBtn');
+        const homeworkIdToDeleteInput = document.getElementById('homeworkIdToDeleteInput');
+        const homeworkTitleToDelete = document.getElementById('homeworkTitleToDelete');
+        const deleteHomeworkModalOverlay = deleteHomeworkConfirmModal.querySelector('.modal-overlay');
+
+        function openModal(modalElement) {
+            modalElement.classList.remove('modal-closed');
+            modalElement.classList.add('modal-open');
+            document.body.classList.add('modal-active');
+        }
+
+        function closeModal(modalElement) {
+            modalElement.classList.add('modal-closed');
+            modalElement.classList.remove('modal-open');
+            document.body.classList.remove('modal-active');
+        }
+        
+        function initializePlugins() {
+            if (typeof $ !== 'undefined' && typeof $.fn.select2 === 'function') {
+                $(targetStudentsSelect).select2({
+                    placeholder: "دانش آموزان هدف (اختیاری، اگر خالی باشد برای همه است)", // متن placeholder اصلاح شد
+                    dir: "rtl",
+                    dropdownParent: $('#homeworkModal') 
+                });
+            } else { console.error("jQuery یا Select2 در دسترس نیست."); }
+
+            const datepickerOptions = {
+                format: 'YYYY/MM/DD', autoClose: true, observer: true, persianDigit: true, initialValue: false
+            };
+            if (typeof persianDate !== 'undefined' && typeof $.fn.pDatepicker === 'function') {
+                // $('#homeworkDefinedDate').pDatepicker(datepickerOptions); // حذف شد
+                $('#homeworkDueDate').pDatepicker(datepickerOptions);
+            } else { console.error("pDatepicker یا persianDate در دسترس نیست برای فرم تکلیف."); }
+        }
+
+        async function fetchAllStudentsDataOnce() {
+            if (allStudentsData.length > 0) return allStudentsData;
+            try {
+                const response = await fetch(`${API_BASE_URL}/students`);
+                if (!response.ok) throw new Error('خطا در دریافت لیست دانش‌آموزان');
+                allStudentsData = await response.json();
+                if (typeof $ !== 'undefined' && typeof $.fn.select2 === 'function') {
+                    $(targetStudentsSelect).empty(); 
+                    allStudentsData.forEach(student => {
+                        const option = new Option(`${student.first_name} ${student.last_name} (${student.student_class || ''})`, student.id, false, false);
+                        $(targetStudentsSelect).append(option);
+                    });
+                    $(targetStudentsSelect).trigger('change'); 
+                }
+                return allStudentsData;
+            } catch (error) {
+                console.error("خطا در fetchAllStudentsDataOnce:", error);
+                return [];
+            }
+        }
+
+        async function fetchAndRenderHomeworks() {
+            noHomeworkMessage.textContent = 'در حال بارگذاری لیست تکالیف...';
+            noHomeworkMessage.classList.remove('hidden');
+            homeworkListTableBody.innerHTML = '';
+            try {
+                const response = await fetch(`${API_BASE_URL}/homeworks`);
+                if (!response.ok) throw new Error(`خطا در دریافت تکالیف: ${response.status}`);
+                const homeworks = await response.json();
+                homeworkListTableBody.innerHTML = '';
+                if (homeworks.length === 0) {
+                    noHomeworkMessage.textContent = 'هیچ تکلیفی تعریف نشده است.';
+                    return;
+                }
+                noHomeworkMessage.classList.add('hidden');
+
+                homeworks.forEach(hw => {
+                    const row = homeworkListTableBody.insertRow();
+                    row.setAttribute('data-id', hw.id);
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${hw.title} ${hw.subject ? `(${hw.subject})` : ''}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${hw.defined_date}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${hw.due_date}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button class="view-status-btn text-blue-600 hover:text-blue-900 ml-3" data-id="${hw.id}" data-title="${hw.title}">مشاهده/ثبت وضعیت</button>
+                            <button class="edit-homework-btn text-indigo-600 hover:text-indigo-900 ml-3" data-id="${hw.id}">ویرایش</button>
+                            <button class="delete-homework-btn text-red-600 hover:text-red-900" data-id="${hw.id}" data-title="${hw.title}">حذف</button>
+                        </td>
+                    `;
+                });
+                addHomeworkTableEventListeners();
+            } catch (error) {
+                console.error('خطا در fetchAndRenderHomeworks:', error);
+                noHomeworkMessage.textContent = `خطا در بارگذاری تکالیف: ${error.message}`;
+            }
+        }
+
+        function populateHomeworkForm(hw) {
+            homeworkIdInput.value = hw.id;
+            homeworkTitleInput.value = hw.title;
+            // $('#homeworkDefinedDate').val(hw.defined_date); // حذف شد
+            // if (typeof $.fn.pDatepicker === 'function' && $('#homeworkDefinedDate').pDatepicker && hw.defined_date) {
+            //      try { new persianDate(hw.defined_date.split('/').map(Number)).isValid() && $('#homeworkDefinedDate').pDatepicker('setDate', new persianDate(hw.defined_date.split('/').map(Number)).valueOf()); } catch(e){}
+            // }
+            $('#homeworkDueDate').val(hw.due_date);
+            if (typeof $.fn.pDatepicker === 'function' && $('#homeworkDueDate').pDatepicker && hw.due_date) {
+                 try { new persianDate(hw.due_date.split('/').map(Number)).isValid() && $('#homeworkDueDate').pDatepicker('setDate', new persianDate(hw.due_date.split('/').map(Number)).valueOf()); } catch(e){console.warn("Error setting due_date on datepicker for edit", e)}
+            }
+            homeworkDescriptionTextarea.value = hw.description || '';
+            $(targetStudentsSelect).val(null).trigger('change'); 
+        }
+
+        function addHomeworkTableEventListeners(){
+            // ... (event listeners for view-status, edit, delete - no major change here, but ensure they exist)
+             document.querySelectorAll('.view-status-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const hwId = parseInt(this.getAttribute('data-id'));
+                    const hwTitle = this.getAttribute('data-title');
+                    openHomeworkStatusModal(hwId, hwTitle);
+                });
+            });
+            
+            document.querySelectorAll('.edit-homework-btn').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const hwId = parseInt(this.getAttribute('data-id'));
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/homeworks/${hwId}`);
+                        if(!response.ok) throw new Error('خطا در دریافت اطلاعات تکلیف برای ویرایش');
+                        const homeworkToEdit = await response.json();
+                        
+                        populateHomeworkForm(homeworkToEdit);
+                        homeworkModalTitle.textContent = "ویرایش تکلیف";
+                        saveHomeworkBtn.textContent = "ذخیره تغییرات";
+                        openModal(homeworkModal);
+                    } catch(error) {
+                        console.error("خطا در آماده سازی فرم ویرایش تکلیف:", error);
+                        alert(error.message);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.delete-homework-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const hwId = this.getAttribute('data-id');
+                    const hwTitle = this.getAttribute('data-title');
+                    homeworkIdToDeleteInput.value = hwId;
+                    homeworkTitleToDelete.textContent = `عنوان تکلیف: ${hwTitle}`;
+                    openModal(deleteHomeworkConfirmModal);
+                });
+            });
+        }
+
+        defineHomeworkBtn.addEventListener('click', () => {
+            homeworkForm.reset();
+            $(targetStudentsSelect).val(null).trigger('change'); 
+            homeworkIdInput.value = ''; 
+            homeworkModalTitle.textContent = 'تعریف تکلیف جدید';
+            saveHomeworkBtn.textContent = 'ذخیره تکلیف';
+            // تاریخ تعریف دیگر در فرم نیست، توسط سرور یا به صورت پیش فرض در فرانت اند ست می شود
+            // $('#homeworkDefinedDate').val(''); // حذف شد
+            $('#homeworkDueDate').val(''); 
+            openModal(homeworkModal);
+        });
+
+        cancelHomeworkModalBtn.addEventListener('click', () => closeModal(homeworkModal));
+        if(homeworkModalOverlay) homeworkModalOverlay.addEventListener('click', () => closeModal(homeworkModal));
+        if(homeworkModalCloseIcon) homeworkModalCloseIcon.addEventListener('click', () => closeModal(homeworkModal));
+
+        homeworkForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const id = parseInt(homeworkIdInput.value);
+            // const definedDate = $('#homeworkDefinedDate').val(); // حذف شد، توسط سرور یا پیش فرض فرانت اند
+            const dueDate = $('#homeworkDueDate').val();    
+            const selectedStudentIds = $(targetStudentsSelect).val() ? $(targetStudentsSelect).val().map(idStr => parseInt(idStr)) : [];
+
+            // تاریخ تعریف را در لحظه ایجاد در فرانت‌اند به فرمت شمسی می‌سازیم
+            let definedDateForPayload = '';
+            if (typeof persianDate !== 'undefined' && !id) { // فقط برای تکالیف جدید
+                 definedDateForPayload = new persianDate().toLocale('fa').format('YYYY/MM/DD');
+            } else if (id) { // برای ویرایش، تاریخ تعریف از سرور خوانده شده و تغییر نمی‌کند
+                // باید defined_date را از تکلیف موجود بگیریم اگر قرار است ارسال شود
+                // یا بک‌اند آن را در آپدیت نادیده بگیرد
+                // فعلا در PUT، defined_date ارسال نمی‌شود (بک‌اند آن را تغییر نمی‌دهد)
+            }
+
+
+            const homeworkPayload = {
+                title: homeworkTitleInput.value.trim(),
+                // subject: "" // دیگر ارسال نمی‌شود، بک‌اند آن را اختیاری کرده
+                due_date: dueDate,
+                description: homeworkDescriptionTextarea.value.trim(),
+                target_student_ids: selectedStudentIds
+            };
+            
+            // فقط برای تکالیف جدید، تاریخ تعریف را اضافه کن
+            if (!id && definedDateForPayload) {
+                homeworkPayload.defined_date = definedDateForPayload;
+            }
+
+
+            if (!homeworkPayload.title || !homeworkPayload.due_date || (!id && !homeworkPayload.defined_date) ) {
+                alert('لطفاً عنوان، تاریخ تعریف (برای تکلیف جدید) و تاریخ تحویل را مشخص کنید.');
+                return;
+            }
+
+            let url = `${API_BASE_URL}/homeworks`;
+            let method = 'POST';
+            if (id) { 
+                url = `${API_BASE_URL}/homeworks/${id}`;
+                method = 'PUT';
+                delete homeworkPayload.target_student_ids; 
+                delete homeworkPayload.defined_date; // تاریخ تعریف در ویرایش تغییر نمی‌کند
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(homeworkPayload),
+                });
+                const responseData = await response.json();
+                if (!response.ok) throw new Error(responseData.message || `خطا: ${response.status}`);
+                
+                console.log("پیام سرور:", responseData.message || (id ? 'تکلیف با موفقیت ویرایش شد.' : 'تکلیف با موفقیت ایجاد شد.'));
+                fetchAndRenderHomeworks(); 
+                closeModal(homeworkModal);
+            } catch (error) {
+                console.error(`خطا در ${id ? 'ویرایش' : 'ایجاد'} تکلیف:`, error);
+                alert(error.message);
+            }
+        });
+        
+        cancelDeleteHomeworkBtn.addEventListener('click', () => closeModal(deleteHomeworkConfirmModal));
+        if(deleteHomeworkModalOverlay) deleteHomeworkModalOverlay.addEventListener('click', () => closeModal(deleteHomeworkConfirmModal));
+
+        confirmDeleteHomeworkBtn.addEventListener('click', async function() {
+            // ... (منطق حذف تکلیف بدون تغییر)
+            const idToDelete = parseInt(homeworkIdToDeleteInput.value);
+            if(!idToDelete) return;
+            try {
+                const response = await fetch(`${API_BASE_URL}/homeworks/${idToDelete}`, { method: 'DELETE' });
+                const responseData = await response.json();
+                if (!response.ok) throw new Error(responseData.message || `خطا: ${response.status}`);
+                console.log("پیام حذف:", responseData.message);
+                fetchAndRenderHomeworks();
+                closeModal(deleteHomeworkConfirmModal);
+            } catch (error) {
+                console.error("خطا در حذف تکلیف:", error);
+                alert(error.message);
+            }
+        });
+
+        // --- منطق مودال ثبت وضعیت تکلیف (بدون تغییر عمده) ---
+        async function openHomeworkStatusModal(homeworkId, homeworkTitle) {
+            // ... (بدون تغییر عمده، فقط اطمینان از استفاده از allStudentsData)
+            currentHomeworkIdForStatusInput.value = homeworkId;
+            if(homeworkStatusTitleDisplay) homeworkStatusTitleDisplay.textContent = homeworkTitle;
+            
+            studentHomeworkStatusTableBody.innerHTML = ''; 
+            if(noStudentsForStatusMessage) noStudentsForStatusMessage.textContent = 'در حال بارگذاری وضعیت‌ها...';
+            if(noStudentsForStatusMessage) noStudentsForStatusMessage.classList.remove('hidden');
+
+            try {
+                const studentsForStatus = await fetchAllStudentsDataOnce(); // استفاده از لیست کش شده
+                
+                const statusResponse = await fetch(`${API_BASE_URL}/homeworks/${homeworkId}/statuses`);
+                if (!statusResponse.ok) throw new Error('خطا در دریافت وضعیت‌های تکلیف');
+                const currentStatuses = await statusResponse.json();
+                const statusMap = currentStatuses.reduce((map, s) => { map[s.student_id] = s; return map; }, {});
+
+                if(noStudentsForStatusMessage) noStudentsForStatusMessage.classList.add('hidden');
+                studentHomeworkStatusTableBody.innerHTML = ''; 
+
+                let studentsToDisplayInModal = [];
+                // اگر تکلیف به دانش آموزان خاصی محول شده (یعنی currentStatuses فقط شامل آنهاست و طولش کمتر از همه دانش آموزان است)
+                // فقط آنها را نمایش بده. در غیر این صورت (یا اگر currentStatuses خالی است)، همه دانش آموزان را نشان بده.
+                if (currentStatuses.length > 0 && currentStatuses.length < allStudentsData.length) {
+                    const targetStudentIds = new Set(currentStatuses.map(s => s.student_id));
+                    studentsToDisplayInModal = allStudentsData.filter(s => targetStudentIds.has(s.id));
+                } else {
+                    studentsToDisplayInModal = allStudentsData;
+                }
+                
+                if (studentsToDisplayInModal.length === 0 && allStudentsData.length > 0) {
+                     studentsToDisplayInModal = allStudentsData; 
+                 }
+
+
+                if (studentsToDisplayInModal.length === 0) {
+                     if(noStudentsForStatusMessage) noStudentsForStatusMessage.textContent = 'دانش‌آموزی برای نمایش وضعیت یافت نشد.';
+                     if(noStudentsForStatusMessage) noStudentsForStatusMessage.classList.remove('hidden');
+                     openModal(homeworkStatusModal);
+                     return;
+                }
+
+
+                studentsToDisplayInModal.forEach(student => {
+                    const row = studentHomeworkStatusTableBody.insertRow();
+                    const existingStatusData = statusMap[student.id];
+                    const currentStatusValue = existingStatusData ? existingStatusData.status : '';
+                    const currentNotes = existingStatusData ? existingStatusData.submission_notes : '';
+
+                    row.innerHTML = `
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">${student.first_name} ${student.last_name}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm">
+                            <select data-student-id="${student.id}" class="status-select form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <option value="" ${currentStatusValue === '' ? 'selected' : ''}>-- انتخاب وضعیت --</option>
+                                <option value="انجام داده" ${currentStatusValue === 'انجام داده' ? 'selected' : ''}>انجام داده</option>
+                                <option value="انجام نداده" ${currentStatusValue === 'انجام نداده' ? 'selected' : ''}>انجام نداده</option>
+                                <option value="ناقص انجام داده" ${currentStatusValue === 'ناقص انجام داده' ? 'selected' : ''}>ناقص انجام داده</option>
+                            </select>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm">
+                            <input type="text" data-student-id="${student.id}" class="notes-input form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm sm:text-sm" placeholder="یادداشت..." value="${currentNotes || ''}">
+                        </td>
+                    `;
+                });
+            } catch (error) {
+                console.error("خطا در openHomeworkStatusModal:", error);
+                if(noStudentsForStatusMessage) noStudentsForStatusMessage.textContent = `خطا: ${error.message}`;
+                if(noStudentsForStatusMessage) noStudentsForStatusMessage.classList.remove('hidden');
+            }
+            openModal(homeworkStatusModal);
+        }
+
+        cancelHomeworkStatusModalBtn.addEventListener('click', () => closeModal(homeworkStatusModal));
+        if(homeworkStatusModalOverlay) homeworkStatusModalOverlay.addEventListener('click', () => closeModal(homeworkStatusModal));
+        if(homeworkStatusModalCloseIcon) homeworkStatusModalCloseIcon.addEventListener('click', () => closeModal(homeworkStatusModal));
+
+        saveAllHomeworkStatusBtn.addEventListener('click', async function() {
+            const homeworkId = parseInt(currentHomeworkIdForStatusInput.value);
+            if (!homeworkId) return;
+            const statusesToSave = [];
+            const statusRows = studentHomeworkStatusTableBody.querySelectorAll('tr');
+            statusRows.forEach(row => {
+                const statusSelect = row.querySelector('.status-select');
+                const notesInput = row.querySelector('.notes-input');
+                if (statusSelect && notesInput) {
+                    const studentId = parseInt(statusSelect.getAttribute('data-student-id'));
+                    const statusValue = statusSelect.value;
+                    const notesValue = notesInput.value.trim();
+                     statusesToSave.push({
+                        student_id: studentId,
+                        status: statusValue || "انجام نداده", 
+                        submission_notes: notesValue
+                    });
+                }
+            });
+
+            if (statusesToSave.length === 0) {
+                console.log("هیچ وضعیتی برای ذخیره انتخاب یا تغییر داده نشده است.");
+                closeModal(homeworkStatusModal);
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE_URL}/homeworks/${homeworkId}/statuses`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(statusesToSave)
+                });
+                const responseData = await response.json();
+                if (!response.ok) throw new Error(responseData.message || `خطا: ${response.status}`);
+                console.log("پیام سرور (ذخیره وضعیت‌ها):", responseData.message);
+                closeModal(homeworkStatusModal);
+            } catch (error) {
+                console.error("خطا در ذخیره وضعیت تکالیف:", error);
+                alert(error.message);
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === "Escape") {
+                if (homeworkModal.classList.contains('modal-open')) closeModal(homeworkModal);
+                if (homeworkStatusModal.classList.contains('modal-open')) closeModal(homeworkStatusModal);
+                if (deleteHomeworkConfirmModal.classList.contains('modal-open')) closeModal(deleteHomeworkConfirmModal);
+            }
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initializePlugins(); 
+            fetchAndRenderHomeworks();
+            fetchAllStudentsDataOnce(); 
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم مدیریت کلاس - عملکرد روزانه</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    <style>
+        html, body { height: 100%; margin: 0; padding: 0; }
+        body { font-family: 'Vazirmatn', sans-serif; display: flex; flex-direction: column; min-height: 100vh; background-color: #f3f4f6; color: #1f2937; }
+        main { flex-grow: 1; }
+        .form-select, .form-input, .form-textarea { padding-right: 0.75rem; }
+        .datepicker-input {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5M12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008ZM14.25 15h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008ZM16.5 15h.008v.008H16.5V15zm0 2.25h.008v.008H16.5v-.008Z' /%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: left 0.75rem center; background-size: 1.25rem; padding-left: 2.5rem; cursor: pointer;
+        }
+        .datepicker-plot-area { font-family: 'Vazirmatn', sans-serif !important; z-index: 100; }
+        .log-entry { border-bottom: 1px solid #e5e7eb; padding-bottom: 0.75rem; margin-bottom: 0.75rem; }
+        .log-entry:last-child { border-bottom: none; margin-bottom: 0; }
+    </style>
+</head>
+<body>
+    <header class="bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold"><h1>سیستم مدیریت کلاس</h1></a>
+            <nav>
+                <ul class="flex space-x-4 space-x-reverse">
+                    <li><a href="students.html" class="hover:text-sky-200">دانش‌آموزان</a></li>
+                    <li><a href="grades.html" class="hover:text-sky-200">نمرات</a></li>
+                    <li><a href="homework.html" class="hover:text-sky-200">تکالیف</a></li>
+                    <li><a href="attendance.html" class="hover:text-sky-200">غیبت‌ها</a></li>
+                    <li><a href="performance_log.html" class="text-sky-200 font-semibold border-b-2 border-sky-200">عملکرد</a></li>
+                    <li><a href="reports.html" class="hover:text-sky-200">گزارش‌ها</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold text-teal-600 mb-6">ثبت و مشاهده عملکرد روزانه دانش‌آموزان</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <div>
+                    <label for="log-date-selector" class="block text-sm font-medium text-gray-700 mb-1">انتخاب تاریخ:</label>
+                    <input type="text" id="log-date-selector" class="form-input datepicker-input mt-1 block w-full" placeholder="برای انتخاب تاریخ کلیک کنید...">
+                </div>
+                <div>
+                    <label for="log-student-select" class="block text-sm font-medium text-gray-700 mb-1">انتخاب دانش‌آموز:</label>
+                    <select id="log-student-select" class="form-select mt-1 block w-full">
+                        <option value="">-- بارگذاری لیست دانش‌آموزان --</option>
+                    </select>
+                </div>
+            </div>
+
+            <form id="performance-log-form" class="mb-8">
+                <input type="hidden" id="logIdInput">
+                <div>
+                    <label for="log-text-area" class="block text-sm font-medium text-gray-700 mb-1">شرح عملکرد/مشاهده:</label>
+                    <textarea id="log-text-area" rows="4" required class="form-textarea mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="عملکرد دانش‌آموز در این روز را توصیف کنید..."></textarea>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button type="submit" id="saveLogBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow">
+                        ثبت عملکرد
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-10">
+                <h3 class="text-xl font-semibold text-teal-500 mb-4">عملکردهای ثبت شده برای <span id="selected-log-student-date-display" class="text-teal-700">[دانش‌آموز و تاریخ انتخاب نشده]</span></h3>
+                <div id="logs-display-area" class="space-y-4 bg-gray-50 p-4 rounded-md">
+                    <p id="no-logs-message" class="text-gray-500">لطفاً یک تاریخ و دانش‌آموز انتخاب کنید تا لاگ‌های عملکرد نمایش داده شوند یا لاگ جدیدی ثبت کنید.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-700 text-white text-center p-4 mt-auto">
+        <p>&copy; ۱۴۰۴-۱۴۰۵ محمد نیکزاد. تمامی حقوق محفوظ است.</p>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:5000/api';
+        let allStudentsDataForLog = [];
+
+        const logDateSelector = document.getElementById('log-date-selector');
+        const logStudentSelect = document.getElementById('log-student-select');
+        const performanceLogForm = document.getElementById('performance-log-form');
+        const logIdInput = document.getElementById('logIdInput');
+        const logTextArea = document.getElementById('log-text-area');
+        const saveLogBtn = document.getElementById('saveLogBtn');
+        const logsDisplayArea = document.getElementById('logs-display-area');
+        const noLogsMessage = document.getElementById('no-logs-message');
+        const selectedLogStudentDateDisplay = document.getElementById('selected-log-student-date-display');
+
+        $(document).ready(function() {
+            if (typeof persianDate !== 'undefined' && typeof $.fn.pDatepicker === 'function') {
+                $(logDateSelector).pDatepicker({
+                    format: 'YYYY/MM/DD', autoClose: true, observer: true, persianDigit: true, initialValue: false,
+                    onSelect: function() { fetchAndRenderLogs(); }
+                });
+            } else { console.error("pDatepicker یا persianDate برای لاگ عملکرد بارگذاری نشده است."); }
+            
+            fetchStudentsForLogSelect();
+            logStudentSelect.addEventListener('change', fetchAndRenderLogs);
+            // Event listener برای پاک کردن فرم هنگام تغییر دانش آموز یا تاریخ اگر لاگی در حال ویرایش نیست
+            logStudentSelect.addEventListener('change', resetFormIfNotEditing);
+            $(logDateSelector).on('change', resetFormIfNotEditing); // برای تقویم هم همینطور
+        });
+
+        function resetFormIfNotEditing(){
+            if (!logIdInput.value) { // اگر در حالت ویرایش نیستیم
+                logTextArea.value = '';
+                saveLogBtn.textContent = 'ثبت عملکرد';
+            }
+        }
+
+        async function fetchStudentsForLogSelect() {
+            logStudentSelect.innerHTML = '<option value="">-- در حال بارگذاری... --</option>';
+            try {
+                const response = await fetch(`${API_BASE_URL}/students`);
+                if (!response.ok) throw new Error(`خطا در دریافت لیست دانش‌آموزان: ${response.statusText}`);
+                allStudentsDataForLog = await response.json();
+                logStudentSelect.innerHTML = '<option value="">-- انتخاب دانش‌آموز --</option>';
+                allStudentsDataForLog.forEach(student => {
+                    const option = document.createElement('option');
+                    option.value = student.id;
+                    option.textContent = `${student.first_name} ${student.last_name}`;
+                    logStudentSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("خطا در fetchStudentsForLogSelect:", error);
+                logStudentSelect.innerHTML = '<option value="">خطا در بارگذاری</option>';
+            }
+        }
+
+        function displaySelectedInfo() {
+            const dateStr = $(logDateSelector).val();
+            const studentId = logStudentSelect.value;
+            const studentName = studentId ? logStudentSelect.options[logStudentSelect.selectedIndex].text : "دانش‌آموزی";
+            const dateText = dateStr || "تاریخی";
+            selectedLogStudentDateDisplay.textContent = `${studentName} در ${dateText}`;
+        }
+
+        async function fetchAndRenderLogs() {
+            const dateStr = $(logDateSelector).val();
+            const studentId = logStudentSelect.value;
+            displaySelectedInfo();
+
+            if (!dateStr || !studentId) {
+                logsDisplayArea.innerHTML = ''; 
+                noLogsMessage.textContent = "لطفاً یک تاریخ و یک دانش‌آموز را برای مشاهده یا ثبت عملکرد انتخاب کنید.";
+                noLogsMessage.classList.remove('hidden');
+                resetFormIfNotEditing(); // فرم را هم ریست کن
+                return;
+            }
+
+            logsDisplayArea.innerHTML = ''; 
+            noLogsMessage.textContent = 'در حال بارگذاری لاگ‌های عملکرد...';
+            noLogsMessage.classList.remove('hidden');
+            resetFormIfNotEditing(); // فرم را ریست کن تا برای ورود جدید آماده باشد (مگر اینکه در حال ویرایش باشیم)
+
+
+            try {
+                const queryParams = new URLSearchParams({ date_str: dateStr, student_id: studentId });
+                const response = await fetch(`${API_BASE_URL}/performance_logs?${queryParams.toString()}`);
+                if (!response.ok) {
+                    const errData = await response.json().catch(()=>({}));
+                    throw new Error(errData.message || `خطای HTTP: ${response.status}`);
+                }
+                const logs = await response.json();
+
+                if (logs.length === 0) {
+                    noLogsMessage.textContent = `لاگ عملکردی برای این دانش‌آموز در تاریخ ${dateStr} ثبت نشده است.`;
+                    return;
+                }
+                noLogsMessage.classList.add('hidden');
+
+                logs.forEach(log => {
+                    const logEntryDiv = document.createElement('div');
+                    logEntryDiv.className = 'log-entry bg-white p-3 rounded-md shadow-sm border border-gray-200'; // بهبود ظاهر
+                    logEntryDiv.setAttribute('data-log-id', log.id);
+                    logEntryDiv.innerHTML = `
+                        <p class="text-gray-800 whitespace-pre-wrap">${log.log_text}</p>
+                        <p class="text-xs text-gray-400 mt-2">ثبت شده در: ${new Date(log.created_at).toLocaleString('fa-IR', {dateStyle:'short', timeStyle:'short'})}</p>
+                        <div class="mt-2 text-left">
+                            <button class="edit-log-btn text-sm text-indigo-600 hover:text-indigo-800 mr-2" data-logid="${log.id}" data-logtext="${escape(log.log_text)}">ویرایش</button>
+                            <button class="delete-log-btn text-sm text-red-600 hover:text-red-800" data-logid="${log.id}">حذف</button>
+                        </div>
+                    `;
+                    logsDisplayArea.appendChild(logEntryDiv);
+                });
+                addLogActionListeners();
+
+            } catch (error) {
+                console.error('خطا در دریافت لاگ‌های عملکرد:', error);
+                noLogsMessage.textContent = `خطا در بارگذاری لاگ‌ها: ${error.message}`;
+            }
+        }
+
+        function addLogActionListeners() {
+            document.querySelectorAll('.edit-log-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const logId = this.dataset.logid;
+                    const logText = unescape(this.dataset.logtext); // استفاده از unescape
+                    
+                    logIdInput.value = logId;
+                    logTextArea.value = logText;
+                    saveLogBtn.textContent = 'به‌روزرسانی عملکرد';
+                    logTextArea.focus();
+                    performanceLogForm.scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+
+            document.querySelectorAll('.delete-log-btn').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const logId = this.dataset.logid;
+                    if (confirm('آیا از حذف این لاگ عملکرد مطمئن هستید؟')) {
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/performance_logs/${logId}`, { method: 'DELETE' });
+                            const responseData = await response.json();
+                            if (!response.ok) throw new Error(responseData.message || `خطا: ${response.status}`);
+                            console.log(responseData.message);
+                            fetchAndRenderLogs(); 
+                        } catch (error) {
+                            console.error('خطا در حذف لاگ عملکرد:', error);
+                            alert(`خطا در حذف لاگ: ${error.message}`);
+                        }
+                    }
+                });
+            });
+        }
+
+        performanceLogForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const currentLogId = logIdInput.value;
+            const studentId = logStudentSelect.value;
+            const dateStr = $(logDateSelector).val();
+            const logText = logTextArea.value.trim();
+
+            if (!studentId || !dateStr || !logText) {
+                alert('لطفاً تاریخ، دانش‌آموز و شرح عملکرد را وارد کنید.');
+                return;
+            }
+
+            const payload = {
+                student_id: parseInt(studentId),
+                date_str: dateStr,
+                log_text: logText
+            };
+
+            let url = `${API_BASE_URL}/performance_logs`;
+            let method = 'POST';
+
+            if (currentLogId) { // اگر ID وجود دارد، یعنی در حالت ویرایش هستیم
+                url = `${API_BASE_URL}/performance_logs/${currentLogId}`;
+                method = 'PUT';
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const responseData = await response.json();
+                if (!response.ok) {
+                    throw new Error(responseData.message || `خطا با کد وضعیت: ${response.status}`);
+                }
+                console.log(responseData.message);
+                
+                // ریست کردن فرم برای ورود بعدی یا پایان ویرایش
+                logTextArea.value = '';
+                logIdInput.value = ''; 
+                saveLogBtn.textContent = 'ثبت عملکرد';
+                
+                fetchAndRenderLogs(); // بارگذاری مجدد لاگ‌ها برای تاریخ و دانش آموز فعلی
+
+            } catch (error) {
+                console.error(`خطا در ${currentLogId ? 'به‌روزرسانی' : 'ثبت'} لاگ عملکرد:`, error);
+                alert(`خطا در ${currentLogId ? 'به‌روزرسانی' : 'ثبت'} لاگ: ${error.message}`);
+            }
+        });
+    </script>
+</body>
+</html>
